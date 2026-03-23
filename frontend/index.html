@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>マジックポータル™</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <style>
+            :root { --color-bg: #FAFAFA; --color-black: #333; --color-primary: #799BF9; --color-accent: #FFA775; --color-danger: #FF5151; }
+        </style>
+    </head>
+    <body class="bg-[var(--color-bg)] text-[var(--color-black)] min-h-screen">
+        <div class="min-h-screen p-4 md:p-6 max-w-6xl mx-auto">
+            <div class="flex items-center justify-between gap-4 mb-5">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[var(--color-primary)] text-lg"></i>
+                        <h1 class="text-xl md:text-2xl font-semibold leading-tight">マジックポータル&trade;</h1>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1">アンロックでアプリが解放されます</p>
+                </div>
+                <div class="flex flex-col items-end gap-2">
+                    <button id="logout-button" type="button" class="rounded-md border border-[var(--color-danger)]/20 bg-[var(--color-danger)]/10 text-[var(--color-danger)] px-3 py-2 text-sm cursor-pointer hover:bg-[var(--color-danger)]/15 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-danger)]">
+                        <i class="fa-solid fa-right-from-bracket mr-2"></i>
+                        ログアウト
+                    </button>
+                    <div id="status" class="text-sm text-gray-500 min-h-[1.25rem]"></div>
+                </div>
+            </div>
+
+            <div id="apps" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+            <div class="mt-5 text-xs text-gray-500 leading-relaxed">
+                ※課金/アンロック導線は後で接続します（初期解放: AI伝言板, AI日報, メール文添削）。
+            </div>
+        </div>
+        <script type="module" src="./index.js"></script>
+    </body>
+</html>
+
