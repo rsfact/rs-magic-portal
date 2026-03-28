@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * { margin: 0; box-sizing: border-box; }
+    body { width: 280px; padding: 20px; font-family: 'Segoe UI', sans-serif; background: #fafafa; }
+    h1 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
+    label { font-size: 12px; color: #64748b; display: block; margin-bottom: 4px; }
+    input { width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; }
+    input:focus { border-color: #799BF9; }
+    .hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    .row { margin-bottom: 12px; }
+    .status { font-size: 11px; margin-top: 8px; display: none; text-align: center; }
+    .btn { width: 100%; padding: 9px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .btn:hover { opacity: .85; }
+    .btn-primary { background: #799BF9; color: #fff; }
+    .btn-danger { background: none; color: #FF5151; border: 1px solid #FF5151; margin-top: 8px; }
+    .btn-danger:hover { background: #FFF0F0; opacity: 1; }
+    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .toggle input { display: none; }
+    .toggle span { position: absolute; inset: 0; background: #d1d5db; border-radius: 11px; cursor: pointer; transition: background .2s; }
+    .toggle span::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform .2s; }
+    .toggle input:checked + span { background: #799BF9; }
+    .toggle input:checked + span::after { transform: translateX(18px); }
+    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h1>
+    Magic Portal
+    <label class="toggle"><input type="checkbox" id="enabled"><span></span></label>
+  </h1>
+  <div class="row">
+    <label>API Base URL</label>
+    <input type="text" id="baseUrl" placeholder="https://example.com/mgp/api">
+    <div class="hint">例: https://apps.kon-sys.net/mgp/api</div>
+  </div>
+  <div class="row">
+    <label>URLフィルター（正規表現）</label>
+    <input type="text" id="filter" placeholder=".*">
+    <div class="hint">例: ^https?://(www\.)?google\.com</div>
+  </div>
+  <button class="btn btn-primary" id="save">保存</button>
+  <div class="status" id="saveStatus"></div>
+  <hr class="divider">
+  <div id="loggedOut">
+    <div class="row">
+      <label>メールアドレス</label>
+      <input type="email" id="userId" placeholder="user@example.com">
+    </div>
+    <div class="row">
+      <label>パスワード</label>
+      <input type="password" id="password" placeholder="password">
+    </div>
+    <button class="btn btn-primary" id="login">ログイン</button>
+  </div>
+  <div id="loggedIn" class="hidden">
+    <button class="btn btn-danger" id="logout">ログアウト</button>
+  </div>
+  <div class="status" id="authStatus"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

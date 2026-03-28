@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Magic Portal",
+  "version": "0.2.0",
+  "description": "どのサイトでも右下にMagic Portalを表示します。",
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  },
+  "icons": {
+    "48": "icon.png",
+    "128": "icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "css": [
+        "drawer.css"
+      ],
+      "js": [
+        "drawer.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

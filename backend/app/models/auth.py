@@ -23,7 +23,7 @@ class Tenant(Base):
     name = Column(String, nullable=False, unique=True)
 
     users = relationship("User", back_populates="tenant", cascade="all, delete-orphan")
-
+    apps = relationship("App", back_populates="tenant", cascade="all, delete-orphan")
 
 class User(Base):
     __tablename__ = "users"
@@ -52,5 +52,6 @@ class User(Base):
     pw_hash = Column(String(255), nullable=False)
 
     tenant = relationship("Tenant", back_populates="users")
+    apps = relationship("App", back_populates="user", cascade="all, delete-orphan")
 
     # ========== custom columns below ==========

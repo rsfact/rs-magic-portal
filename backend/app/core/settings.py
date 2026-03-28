@@ -46,6 +46,8 @@ class Settings(BaseSettings):
 
     # ========== custom settings below ==========
 
+    DEFAULT_FA_ICON: str = "fa-solid fa-wand-magic-sparkles"
+
     # Database
     DB_URL: str = "sqlite:///db.sqlite"
 

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link
+            rel="icon"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/svgs/solid/wand-magic-sparkles.svg"
+            type="image/svg+xml"
+        />
+        <title>マジックポータル™</title>
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <style>
+            :root {
+                --color-bg: #fafafa;
+                --color-black: #333;
+                --color-primary: #799bf9;
+                --color-accent: #ffa775;
+                --color-danger: #ff5151;
+            }
+        </style>
+    </head>
+    <body class="bg-[var(--color-bg)] text-[var(--color-black)] min-h-screen">
+        <div class="min-h-screen p-4 md:p-6 max-w-6xl mx-auto">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles text-[var(--color-primary)] text-lg"></i>
+                        <h1 class="text-xl md:text-2xl font-semibold leading-tight">マジックポータル&trade;</h1>
+                    </div>
+                </div>
+                <div class="flex flex-col sm:items-end gap-2">
+                    <div class="flex flex-wrap gap-2 justify-end">
+                        <a
+                            id="admin-link"
+                            href="./apps-edit.html"
+                            class="hidden rounded-md border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-2 text-sm cursor-pointer hover:bg-[var(--color-primary)]/15 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)] inline-flex items-center"
+                        >
+                            <i class="fa-solid fa-pen-to-square mr-2"></i>
+                            アプリ管理
+                        </a>
+                        <button
+                            id="logout-button"
+                            type="button"
+                            class="rounded-md border border-[var(--color-danger)]/20 bg-[var(--color-danger)]/10 text-[var(--color-danger)] px-3 py-2 text-sm cursor-pointer hover:bg-[var(--color-danger)]/15 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-danger)]"
+                        >
+                            <i class="fa-solid fa-right-from-bracket mr-2"></i>
+                            ログアウト
+                        </button>
+                    </div>
+                    <div id="status" class="text-sm text-gray-500 min-h-[1.25rem] text-right w-full"></div>
+                </div>
+            </div>
+
+            <div id="apps" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+        <script type="module" src="./index.js"></script>
+    </body>
+</html>
