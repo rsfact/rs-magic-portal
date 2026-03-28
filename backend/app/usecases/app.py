@@ -9,18 +9,6 @@ from app.schemas import app as schema
 from app.schemas import auth as auth_schema
 
 
-def search(
-    req: schema.ReqSearch, user: auth_schema.ResUserGet, db: Session
-) -> schema.ResSearch:
-    items, total = crud.get_paginated(
-        db, tenant_id=user.tenant.id, page=req.page, size=req.size
-    )
-    res_items = [schema.ResGet.model_validate(a) for a in items]
-    return schema.ResSearch.paginate(
-        items=res_items, total=total, page=req.page, size=req.size
-    )
-
-
 def create(
     req: schema.ReqCreate, user: auth_schema.ResUserGet, db: Session
 ) -> schema.ResCreate:
@@ -42,6 +30,18 @@ def create(
     db.commit()
     db.refresh(created)
     return schema.ResCreate.model_validate(created)
+
+
+def search(
+    req: schema.ReqSearch, user: auth_schema.ResUserGet, db: Session
+) -> schema.ResSearch:
+    items, total = crud.get_paginated(
+        db, tenant_id=user.tenant.id, page=req.page, size=req.size
+    )
+    res_items = [schema.ResGet.model_validate(a) for a in items]
+    return schema.ResSearch.paginate(
+        items=res_items, total=total, page=req.page, size=req.size
+    )
 
 
 def update(

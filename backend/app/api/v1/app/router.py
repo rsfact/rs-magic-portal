@@ -12,17 +12,6 @@ from app.usecases import app as usecase
 router = APIRouter()
 
 
-@router.post("/search", response_model=BaseResponse[schema.ResSearch])
-def search(
-    req: schema.ReqSearch,
-    _: auth_schema.ResJwtDecode = Depends(verify_jwt()),
-    user: auth_schema.ResUserGet = Depends(get_user),
-    db: Session = Depends(get_db)
-):
-    result = usecase.search(req=req, user=user, db=db)
-    return BaseResponse.create_success(result)
-
-
 @router.post("/create", response_model=BaseResponse[schema.ResCreate])
 def create(
     req: schema.ReqCreate,
@@ -34,6 +23,17 @@ def create(
     - `role=admin`
     """
     result = usecase.create(req=req, user=user, db=db)
+    return BaseResponse.create_success(result)
+
+
+@router.post("/search", response_model=BaseResponse[schema.ResSearch])
+def search(
+    req: schema.ReqSearch,
+    _: auth_schema.ResJwtDecode = Depends(verify_jwt()),
+    user: auth_schema.ResUserGet = Depends(get_user),
+    db: Session = Depends(get_db)
+):
+    result = usecase.search(req=req, user=user, db=db)
     return BaseResponse.create_success(result)
 
 
