@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Magic Portal",
   "version": "0.2.0",
-  "description": "どのサイトでも右下にMagic Portalを表示します。",
+  "description": "マジックポータルが、すみっこに暮らします。",
   "permissions": [
     "storage"
   ],
