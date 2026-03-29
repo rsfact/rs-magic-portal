@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Magic Portal",
-  "version": "0.2.0",
-  "description": "マジックポータルが、すみっこに暮らします。",
+  "name": "MGP Launcher",
+  "version": "0.3.0",
+  "description": "マジックポータル™ に接続します。",
   "permissions": [
     "storage"
   ],
@@ -20,10 +20,10 @@
         "<all_urls>"
       ],
       "css": [
-        "drawer.css"
+        "launcher.css"
       ],
       "js": [
-        "drawer.js"
+        "launcher.js"
       ],
       "run_at": "document_idle"
     }

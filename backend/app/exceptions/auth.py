@@ -1,4 +1,4 @@
-""" RS Method - Auth Exception v1.0.0"""
+""" RS Method - Auth Exception v1.1.0"""
 from app.exceptions import base as err
 
 
@@ -42,6 +42,11 @@ class InvalidToken(err.Authentication):
 class TokenExpired(err.Authentication):
     def __init__(self):
         super().__init__(msg="Token has expired.")
+
+
+class TokenInvalidExpireHours(err.Authentication):
+    def __init__(self):
+        super().__init__(msg="expire_hours has exceeded the maximum value.")
 
 
 class PermissionDenied(err.Authorization):

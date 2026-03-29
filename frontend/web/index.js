@@ -18,11 +18,11 @@ function set_status(msg, is_error = false) {
     el.classList.toggle("text-gray-500", !is_error);
 }
 
-async function refresh_token() {
+async function refresh_token(expire_hours = null) {
     const token = get_auth_token();
     if (!token) return null;
-    set_status("トークンを更新中...");
-    const res = await api_post("/auth/users/refresh", {}, { headers: token_authorization_header(token) });
+    const body = expire_hours ? { expire_hours } : {};
+    const res = await api_post("/auth/users/refresh", body, { headers: token_authorization_header(token) });
     if (res.ok && res.json?.success && res.json?.data?.token) {
         const next = res.json.data.token;
         set_auth_token(next);
@@ -57,22 +57,28 @@ async function load_apps(token) {
 function card_html(app) {
     const name = escape_html(app.name);
     const desc = escape_html(app.description);
-    const icon = escape_html(app.fa_icon || "fa-solid fa-grid-2");
-    return `<div class="rounded-2xl bg-white border border-gray-200 p-6 min-h-[220px] hover:-translate-y-0.5 transition transform shadow-sm cursor-pointer focus-within:ring-2 focus-within:ring-[var(--color-primary)]">
+    const icon = escape_html(app.fa_icon || "fa-solid fa-link");
+    return `<div class="relative rounded-xl bg-white border border-slate-100 p-6 min-h-[200px] hover:border-[var(--color-primary)] transition shadow-sm cursor-pointer group">
+${app.is_send_token_enabled ? '<div class="absolute top-4 right-4 text-[var(--color-success)] text-[10px] font-bold flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> 自動ログイン</div>' : ""}
 <div class="flex flex-col h-full">
-<div class="flex items-start gap-3">
-<div class="w-12 h-12 rounded-2xl bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0">
-<i class="${icon} text-[var(--color-primary)] text-lg"></i>
+<div class="flex items-start gap-4">
+<div class="w-10 h-10 rounded-lg bg-slate-50 flex items-center justify-center shrink-0 text-[var(--color-primary)] transition-colors">
+<i class="${icon} text-lg"></i>
 </div>
 <div class="min-w-0">
-<div class="font-semibold leading-tight text-base">${name}</div>
-<div class="text-xs text-gray-500 mt-1 leading-relaxed">${desc}</div>
+<div class="font-medium leading-tight text-slate-700">${name}</div>
+<div class="text-xs text-slate-400 mt-2 description-text leading-relaxed">${desc}</div>
 </div>
 </div>
 <div class="flex-1"></div>
-<button type="button" class="app-launch w-full rounded-xl bg-[var(--color-primary)] text-white py-3 cursor-pointer hover:opacity-90 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]">
-起動 <i class="fa-solid fa-arrow-right ml-2"></i>
+<div class="flex gap-1.5 mt-6">
+<button type="button" class="app-launch flex-[4] rounded-lg bg-[var(--color-primary)] text-white py-2.5 text-sm font-medium cursor-pointer hover:opacity-90 transition shadow-sm">
+起動する
 </button>
+<button type="button" class="app-newtab flex-[1] rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] py-2.5 text-sm font-medium cursor-pointer hover:bg-[var(--color-primary)]/20 transition shadow-sm flex items-center justify-center">
+<i class="fa-solid fa-arrow-up-right-from-square"></i>
+</button>
+</div>
 </div>
 </div>`;
 }
@@ -92,30 +98,45 @@ window.addEventListener("DOMContentLoaded", async () => {
         document.getElementById("admin-link").classList.remove("hidden");
     }
 
-    set_status("アプリを読み込み中...");
     const items = await load_apps(token);
-    if (items == null) return;
+    if (!items) return;
 
     const container = document.getElementById("apps");
     container.innerHTML = "";
 
     if (items.length === 0) {
-        container.innerHTML = '<p class="text-sm text-gray-500 col-span-full">アプリはまだありません。</p>';
-        set_status("");
+        container.innerHTML = '<p class="text-sm text-gray-500 col-span-full text-center">アプリはまだありません。</p>';
         return;
     }
 
-    for (const app of items) {
+    for (const app of items.sort((a,b) => a.position - b.position)) {
         const wrap = document.createElement("div");
         wrap.innerHTML = card_html(app);
         const el = wrap.firstElementChild;
-        const url = app.url;
-        const go = () => {
-            if (url) window.location.assign(url);
+        
+        const getUrl = async () => {
+            if (!app.url) return null;
+            if (app.is_send_token_enabled) {
+                const t = await refresh_token(1);
+                if (t) {
+                    const sep = app.url.includes('#') ? '&' : '#';
+                    return app.url + sep + 'token=' + encodeURIComponent(t);
+                }
+            }
+            return app.url;
         };
-        el.addEventListener("click", () => go());
+
+        el.querySelector(".app-newtab").addEventListener("click", async (e) => {
+            e.stopPropagation();
+            const u = await getUrl();
+            if (u) window.open(u, "_blank");
+        });
+
+        el.addEventListener("click", async () => {
+            const u = await getUrl();
+            if (u) window.location.assign(u);
+        });
+
         container.appendChild(el);
     }
-
-    set_status("");
 });

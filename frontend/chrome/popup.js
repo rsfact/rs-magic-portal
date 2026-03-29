@@ -8,6 +8,7 @@ var authStatusEl = document.getElementById('authStatus');
 var loggedOutEl = document.getElementById('loggedOut');
 var loggedInEl = document.getElementById('loggedIn');
 
+var goToWebEl = document.getElementById('goToWeb');
 function flash(el, msg, color) {
   el.textContent = msg;
   el.style.color = color;
@@ -18,6 +19,7 @@ function flash(el, msg, color) {
 function authUI(loggedIn) {
   loggedOutEl.className = loggedIn ? 'hidden' : '';
   loggedInEl.className = loggedIn ? '' : 'hidden';
+  goToWebEl.classList.toggle('hidden', !loggedIn);
 }
 
 chrome.storage.local.get(['mgp_enabled', 'mgp_filter', 'mgp_base_url', 'mgp_token'], function (r) {
@@ -33,17 +35,17 @@ enabledEl.addEventListener('change', function () {
 
 document.getElementById('save').addEventListener('click', function () {
   chrome.storage.local.set({
-    mgp_base_url: baseUrlEl.value.trim(),
+    mgp_base_url: baseUrlEl.value.trim().replace(/\/+$/, ''),
     mgp_filter: filterEl.value.trim() || '.*'
   }, function () { flash(saveStatusEl, '保存しました', '#799BF9'); });
 });
 
 document.getElementById('login').addEventListener('click', function () {
-  var base = baseUrlEl.value.trim();
+  var base = baseUrlEl.value.trim().replace(/\/+$/, '');
   var email = emailEl.value.trim();
   var pw = passwordEl.value.trim();
   if (!base || !email || !pw) { flash(authStatusEl, 'すべて入力してください', '#FF5151'); return; }
-  fetch(base.replace(/\/+$/, '') + '/auth/users/login', {
+  fetch(base + '/api/auth/users/login', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({ email: email, password: pw })
@@ -67,4 +69,9 @@ document.getElementById('logout').addEventListener('click', function () {
     authUI(false);
     flash(authStatusEl, 'ログアウトしました', '#FF5151');
   });
+});
+
+goToWebEl.addEventListener('click', function () {
+  var base = baseUrlEl.value.trim().replace(/\/+$/, '');
+  if (base) window.open(base + '/ui', '_blank');
 });

@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     * { margin: 0; box-sizing: border-box; }
     body { width: 280px; padding: 20px; font-family: 'Segoe UI', sans-serif; background: #fafafa; }
@@ -33,9 +34,12 @@
     <label class="toggle"><input type="checkbox" id="enabled"><span></span></label>
   </h1>
   <div class="row">
-    <label>API Base URL</label>
-    <input type="text" id="baseUrl" placeholder="https://example.com/mgp/api">
-    <div class="hint">例: https://apps.kon-sys.net/mgp/api</div>
+    <label>サーバURL</label>
+    <input type="text" id="baseUrl" placeholder="https://magic-portal.com/mgp">
+    <div class="hint">例: https://magic-portal.com/mgp</div>
+    <button id="goToWeb" class="btn btn-primary hidden" style="margin-top:8px; padding:6px 10px; font-size:11px; width:auto; display:inline-flex; align-items:center; gap:6px;">
+      Web版に移動 <i class="fa-solid fa-arrow-up-right-from-square"></i>
+    </button>
   </div>
   <div class="row">
     <label>URLフィルター（正規表現）</label>

@@ -1,4 +1,4 @@
-""" RS Method - Auth Router v1.1.0"""
+""" RS Method - Auth Router v1.2.0"""
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -28,6 +28,22 @@ def create_tenant(
     return BaseResponse.create_success(result)
 
 
+@router.post(
+    "/tenants/search",
+    response_model=BaseResponse[schema.ResTenantSearch],
+)
+def search_tenants(
+    req: schema.ReqTenantSearch,
+    user: User = Depends(get_user),
+    db: Session = Depends(get_db),
+):
+    """
+    - `role=vendor` のみ検索できます。
+    """
+    result = usecase.search_tenants(req, user, db)
+    return BaseResponse.create_success(result)
+
+
 @router.post("/tenants/{tenant_id}/users/signup", response_model=BaseResponse[schema.ResUserCreate])
 def signup(
     tenant_id: str,
@@ -54,7 +70,7 @@ def search_users(
     db: Session = Depends(get_db),
 ):
     """
-    - `role=admin` のみ検索できます。
+    - `role=admin` 以上のみ検索できます。
     """
     result = usecase.search_users(req, user, db)
     return BaseResponse.create_success(result)
@@ -76,14 +92,15 @@ def login(
 
 @router.post("/users/refresh", response_model=BaseResponse[schema.ResRefresh])
 def refresh(
-    _: schema.ReqRefresh,
+    req: schema.ReqRefresh,
     jwt: schema.ResJwtDecode = Depends(verify_jwt())
 ):
     """
-    - 認証方式に関わらず、JWTを検証し、有効期限内であれば新しいJWTを返します。
+    - JWTを検証し、有効期限内であれば新しいJWTを返します。
+    - 新しい有効期限の既定値および上限値は、336時間です。 (24時間 x 14日)
     - 認証関連テーブルの更新は行いません。
     """
-    result = usecase.refresh(jwt)
+    result = usecase.refresh(req, jwt)
     return BaseResponse.create_success(result)
 
 

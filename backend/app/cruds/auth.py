@@ -1,4 +1,4 @@
-"""RS Method - Auth CRUD v1.2.0"""
+"""RS Method - Auth CRUD v1.3.0"""
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -11,6 +11,15 @@ def create_tenant(db: Session, tenant: Tenant) -> Tenant:
     db.flush()
     db.refresh(tenant)
     return tenant
+
+
+def get_paginated_tenants(
+    db: Session, limit: int, offset: int
+) -> tuple[int, list[Tenant]]:
+    query = db.query(Tenant)
+    total = query.count()
+    items = query.offset(offset).limit(limit).all()
+    return total, items
 
 
 def get_tenant_by_id(db: Session, id: str) -> Optional[Tenant]:
@@ -36,7 +45,7 @@ def create_user(db: Session, user: User) -> User:
     return user
 
 
-def get_users_by_tenant_id(
+def get_paginated_users_by_tenant_id(
     db: Session, tenant_id: str, limit: int, offset: int
 ) -> tuple[int, list[User]]:
     query = db.query(User).filter(User.tenant_id == tenant_id)

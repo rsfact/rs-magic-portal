@@ -1,4 +1,6 @@
-""" RS Method - Auth Usecases v1.1.0"""
+""" RS Method - Auth Usecases v1.2.0"""
+from datetime import datetime, timedelta, timezone
+
 from sqlalchemy.orm import Session
 
 from app.core.settings import settings
@@ -29,6 +31,22 @@ def create_tenant(req: schema.ReqTenantCreate, db: Session) -> schema.ResTenantC
     return schema.ResTenantCreate.model_validate(created)
 
 
+def search_tenants(req: schema.ReqTenantSearch, user: User, db: Session) -> schema.ResTenantSearch:
+    if user.role != UserRole.VENDOR:
+        raise err.PermissionDenied()
+
+    limit = req.size
+    offset = (req.page - 1) * req.size
+    total, items = crud.get_paginated_tenants(
+        db=db, limit=limit, offset=offset
+    )
+
+    res_items = [schema.ResTenantGet.model_validate(t) for t in items]
+    return schema.ResTenantSearch.paginate(
+        items=res_items, total=total, page=req.page, size=req.size
+    )
+
+
 def signup(tenant_id: str, req: schema.ReqUserCreate, db: Session) -> schema.ResUserCreate:
     tenant = crud.get_tenant_by_id(db, tenant_id)
     if not tenant:
@@ -52,12 +70,12 @@ def signup(tenant_id: str, req: schema.ReqUserCreate, db: Session) -> schema.Res
 
 
 def search_users(req: schema.ReqUserSearch, user: User, db: Session) -> schema.ResUserSearch:
-    if user.role != UserRole.ADMIN:
+    if user.role not in [UserRole.ADMIN, UserRole.VENDOR]:
         raise err.PermissionDenied()
 
     limit = req.size
     offset = (req.page - 1) * req.size
-    total, items = crud.get_users_by_tenant_id(
+    total, items = crud.get_paginated_users_by_tenant_id(
         db=db, tenant_id=user.tenant.id, limit=limit, offset=offset
     )
 
@@ -135,8 +153,17 @@ def login(req: schema.ReqLogin, db: Session) -> schema.ResLogin:
     )
 
 
-def refresh(jwt: schema.ResJwtDecode) -> schema.ResRefresh:
-    token = auth.create_jwt(jwt.sub, jwt.role.value)
+def refresh(req: schema.ReqRefresh, jwt: schema.ResJwtDecode) -> schema.ResRefresh:
+    if req.expire_hours is None:
+        expire_hours = settings.JWT_DEFAULT_EXPIRE_HOURS
+    else:
+        if req.expire_hours > settings.JWT_REFRESH_MAX_EXPIRE_HOURS:
+            raise err.TokenInvalidExpireHours
+        else:
+            expire_hours = req.expire_hours
+    expires_at = datetime.now(timezone.utc) + timedelta(hours=expire_hours)
+
+    token = auth.create_jwt(jwt.sub, jwt.role.value, expires_at)
 
     return schema.ResRefresh(token=token)
 

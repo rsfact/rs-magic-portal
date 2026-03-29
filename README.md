@@ -38,18 +38,22 @@ PocketCore内PocketBaseに依存。
 
 Vendor導入アプリはUser/Adminから保護。各権限は自作分のみ編集可。
 
-## MGP Drawer
+## MGP Launcher
 
 Chrome拡張機能。どのサイトでも右下にMagic Portalのアプリランチャーを常駐させる。
 
 マウスが右下隅に近づくとアプリが扇状に展開し、離れると収納される。各アプリはクリックでJWT付きURLとして新しいタブで開く。未認証時はログインボタンのみ表示。
 
-APIからアプリ一覧を取得し、空きスロットはプレースホルダーで埋める。拡張機能のポップアップからBase URL、URLフィルター、有効/無効、ログイン/ログアウトを管理する。
+APIからアプリ一覧を取得し、空きスロットはプレースホルダーで埋める。拡張機能のポップアップからサーバURL（例: https://magic-portal.com/mgp）、URLフィルター、有効/無効、ログイン/ログアウトを管理する。
+
+### 導入・デプロイ制約
+
+拡張機能が正常に動作するためには、指定したサーバURLを基準として、APIが `/api/`、Web UIが `/ui/` のパスで構成されている必要があります（例: `https://magic-portal.com/mgp/api/` および `https://magic-portal.com/mgp/ui/`）。これはデプロイ時の固定的な制約です。
 
 ### API
 
-- ログイン: POST {base}/auth/users/login
-- アプリ取得: POST {base}/v1/apps/search
+- ログイン: POST {server_url}/api/auth/users/login
+- アプリ取得: POST {server_url}/api/v1/apps/search
 
 ## Database
 

@@ -1,0 +1,33 @@
+:root {
+    --color-bg: #f8fafc;
+    --color-black: #334155;
+    --color-primary: #799bf9;
+    --color-accent: #ffa775;
+    --color-danger: #ff5151;
+    --color-success: #22c55e;
+}
+
+body {
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--color-bg);
+    color: var(--color-black);
+    -webkit-font-smoothing: antialiased;
+}
+
+[x-cloak] { display: none !important; }
+
+.card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.sortable-ghost {
+    opacity: 0.3;
+    background: #f1f5f9;
+}
+
+.description-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+}

@@ -7,15 +7,8 @@
         <title>マジックポータル™</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-        <style>
-            :root {
-                --color-bg: #fafafa;
-                --color-black: #333;
-                --color-primary: #799bf9;
-                --color-accent: #ffa775;
-                --color-danger: #ff5151;
-            }
-        </style>
+        <link rel="stylesheet" href="./style.css" />
+        <script type="module" src="./index.js"></script>
     </head>
     <body class="bg-[var(--color-bg)] text-[var(--color-black)] min-h-screen">
         <div class="min-h-screen p-4 md:p-6 max-w-6xl mx-auto">
@@ -30,7 +23,7 @@
                     <div class="flex flex-wrap gap-2 justify-end">
                         <a
                             id="admin-link"
-                            href="./apps-edit.html"
+                            href="./admin.html"
                             class="hidden rounded-md border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-2 text-sm cursor-pointer hover:bg-[var(--color-primary)]/15 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)] inline-flex items-center"
                         >
                             <i class="fa-solid fa-pen-to-square mr-2"></i>

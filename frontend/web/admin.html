@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+        <title>アプリ管理</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+        <script src="https://cdn.tailwindcss.com"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+        <link rel="stylesheet" href="./style.css" />
+        <script type="module" src="./admin.js"></script>
+        <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    </head>
+    <body class="bg-[var(--color-bg)] text-[var(--color-black)] min-h-screen">
+        <div class="min-h-screen p-6 md:p-12 max-w-4xl mx-auto" x-data="appManager">
+            <header class="flex items-center justify-between mb-10">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-lg bg-[var(--color-primary)] flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-cube text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-medium tracking-tight text-slate-800">アプリケーション管理</h1>
+                        <p class="text-xs text-slate-400 font-normal">Magic Portal の登録アプリを管理します</p>
+                    </div>
+                </div>
+                <a href="./index.html" class="bg-white border border-slate-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm text-slate-600">
+                    <i class="fa-solid fa-house mr-2 text-xs"></i>ホーム
+                </a>
+            </header>
+
+            <div x-show="gateMsg" x-transition x-text="gateMsg" class="bg-red-50 text-[var(--color-danger)] p-4 rounded-lg text-sm mb-6 border border-red-100" x-cloak></div>
+
+            <div x-show="!isLoading && profile && profile.role === 'admin'" class="space-y-8" x-transition x-cloak>
+                <section class="card rounded-xl p-8">
+                    <h2 class="text-xs font-semibold mb-6 flex items-center gap-2 text-slate-400 uppercase tracking-widest">
+                        <span x-text="formData.id ? '編集モード' : '新規登録'"></span>
+                    </h2>
+                    <form @submit.prevent="submitForm" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">アプリ名</label>
+                            <input x-model="formData.name" required placeholder="例: 社内掲示板" class="w-full rounded-lg border border-slate-200 bg-white p-3 text-sm focus:border-[var(--color-primary)] transition-colors outline-none" />
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">説明</label>
+                            <textarea x-model="formData.description" required placeholder="アプリの簡単な説明" class="w-full rounded-lg border border-slate-200 bg-white p-3 text-sm focus:border-[var(--color-primary)] transition-colors outline-none h-24 resize-none"></textarea>
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">URL</label>
+                            <input x-model="formData.url" required placeholder="https://..." class="w-full rounded-lg border border-slate-200 bg-white p-3 text-sm focus:border-[var(--color-primary)] transition-colors outline-none" />
+                        </div>
+                        <div class="md:col-span-1">
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Font Awesome (省略可)</label>
+                            <input x-model="formData.fa_icon" placeholder="fa-solid fa-star" class="w-full rounded-lg border border-slate-200 bg-white p-3 text-sm focus:border-[var(--color-primary)] transition-colors outline-none" />
+                        </div>
+                        <div class="flex items-center gap-3 py-2">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" x-model="formData.is_send_token_enabled" class="sr-only peer">
+                                <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-success)]"></div>
+                                <span class="ml-3 text-sm font-medium transition-colors" :class="formData.is_send_token_enabled ? 'text-[var(--color-success)]' : 'text-slate-500'">自動ログインを有効にする</span>
+                            </label>
+                        </div>
+                        <div class="md:col-span-2 flex items-center justify-between pt-6 border-t border-slate-50 mt-2">
+                            <div class="flex gap-4">
+                                <button type="submit" class="bg-[var(--color-primary)] text-white px-10 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 active:transform active:scale-95 transition-all shadow-sm" x-text="formData.id ? '変更を保存' : '登録'"></button>
+                                <button type="button" x-show="formData.id" @click="resetForm" class="text-slate-400 hover:text-slate-600 px-4 py-2 text-sm font-medium transition-colors">キャンセル</button>
+                            </div>
+                            <div x-show="status.msg" x-transition x-text="status.msg" :class="status.isErr ? 'text-[var(--color-danger)]' : 'text-[var(--color-success)]'" class="text-sm font-medium"></div>
+                        </div>
+                    </form>
+                </section>
+
+                <section>
+                    <div class="card rounded-xl overflow-hidden">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-slate-50/50 text-slate-400 border-b border-slate-100">
+                                <tr>
+                                    <th class="py-4 px-4 font-semibold w-12 text-center"></th>
+                                    <th class="py-4 pr-6 font-semibold">アプリ</th>
+                                    <th class="py-4 pr-6 font-semibold hidden sm:table-cell">URL</th>
+                                    <th class="py-4 pr-6 font-semibold text-center w-40">機能</th>
+                                    <th class="py-4 px-6 font-semibold text-right w-24">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody x-ref="sortableList">
+                                <template x-for="app in apps" :key="app.id">
+                                    <tr class="group border-b border-slate-50 last:border-0 transition-colors hover:bg-slate-50/30" :data-id="app.id">
+                                        <td class="p-0">
+                                            <div class="handle w-full h-16 flex items-center justify-center cursor-grab active:cursor-grabbing text-slate-200 group-hover:text-slate-300 transition-colors">
+                                                <i class="fa-solid fa-grip-vertical text-lg"></i>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 pr-6">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-8 h-8 rounded bg-slate-50 flex items-center justify-center text-slate-300">
+                                                    <i :class="app.fa_icon || 'fa-solid fa-link'" class="text-xs"></i>
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <div class="font-medium text-slate-700" x-text="app.name"></div>
+                                                    <div class="text-[10px] text-slate-400 description-text leading-tight" x-text="app.description"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 pr-6 hidden sm:table-cell">
+                                            <span class="text-slate-300 truncate max-w-[200px] block font-normal text-xs" x-text="app.url"></span>
+                                        </td>
+                                        <td class="py-4 pr-6 text-center">
+                                            <div x-show="app.is_send_token_enabled" class="inline-flex items-center gap-2 text-[var(--color-success)] font-medium">
+                                                <i class="fa-solid fa-shield-halved text-sm"></i>
+                                                <span class="text-xs tracking-tight">自動ログイン</span>
+                                            </div>
+                                        </td>
+                                        <td class="py-4 px-6 text-right">
+                                            <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <button @click="editApp(app)" class="p-2 text-slate-300 hover:text-[var(--color-primary)] transition-colors" title="編集"><i class="fa-solid fa-pen-to-square"></i></button>
+                                                <button @click="deleteApp(app.id)" class="p-2 text-slate-300 hover:text-[var(--color-danger)] transition-colors" title="削除"><i class="fa-solid fa-trash-can"></i></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </body>
+</html>

@@ -35,7 +35,7 @@
   function api(base, path, token, body) {
     var h = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
     if (token) h['Authorization'] = 'Bearer ' + token;
-    return fetch(base.replace(/\/+$/, '') + path, { method: 'POST', headers: h, body: JSON.stringify(body) })
+    return fetch(base.replace(/\/+$/, '') + '/api' + path, { method: 'POST', headers: h, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); });
   }
 
@@ -45,13 +45,25 @@
       .then(function (d) { cb(d.success && d.data ? d.data.token : null); })
       .catch(function () { cb(null); });
   }
+  function refreshToken(base, token, expireHours, cb) {
+    api(base, '/auth/users/refresh', token, { expire_hours: expireHours })
+      .then(function (d) { cb(d.success && d.data ? d.data.token : null); })
+      .catch(function () { cb(null); });
+  }
 
   function fetchApps(base, token, cb) {
     api(base, '/v1/apps/search', token, { page: 1, size: MAX_SLOTS })
       .then(function (d) {
         if (d.success && d.data && d.data.items) {
-          cb(d.data.items.map(function (i) {
-            return { name: i.name, url: i.url, fa: i.fa_icon, description: i.description };
+          var items = d.data.items.sort(function (a, b) { return a.position - b.position; });
+          cb(items.map(function (i) {
+            return {
+              name: i.name,
+              url: i.url,
+              fa: i.fa_icon,
+              description: i.description,
+              is_send_token_enabled: i.is_send_token_enabled
+            };
           }));
         } else { cb([]); }
       })
@@ -118,7 +130,7 @@
     return list;
   }
 
-  function buildDrawer(apps, token, onLoginClick) {
+  function buildLauncher(apps, token, onLoginClick) {
     var slots = padSlots(apps);
     var ripple = document.createElement('div');
     ripple.className = 'mgp-ripple';
@@ -130,9 +142,9 @@
 
     var els = slots.map(function (app, i) {
       var a = document.createElement('a');
-      a.href = app._empty || app._login ? '#' : appendToken(app.url || '#', token);
+      a.href = (app._empty || app._login || app.is_send_token_enabled) ? '#' : (app.url || '#');
       a.className = 'mgp-item' + (app._empty ? ' mgp-empty' : '');
-      if (!app._login && !app._empty) a.target = '_blank';
+      if (!app._login && !app._empty && !app.is_send_token_enabled) a.target = '_blank';
       var icon = document.createElement('div');
       icon.className = 'mgp-icon' + (app._empty ? ' mgp-empty-icon' : '');
       if (app._empty) {
@@ -150,6 +162,18 @@
         a.appendChild(tip);
       }
       if (app._login && onLoginClick) a.addEventListener('click', function (e) { e.preventDefault(); onLoginClick(); });
+      if (app.is_send_token_enabled && !app._empty) {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          extGet(['mgp_base_url'], function (r) {
+            refreshToken(r.mgp_base_url, token, 1, function (nextToken) {
+              var finalT = nextToken || token;
+              if (nextToken) extSet({ mgp_token: nextToken }, function () {});
+              window.open(appendToken(app.url, finalT), '_blank');
+            });
+          });
+        });
+      }
       if (app._empty) a.addEventListener('click', function (e) { e.preventDefault(); });
       wrap.appendChild(a);
       return a;
@@ -195,14 +219,14 @@
 
   function startApps(base, token) {
     if (base) {
-      fetchApps(base, token, function (apps) { buildDrawer(apps, token); });
+      fetchApps(base, token, function (apps) { buildLauncher(apps, token); });
     } else {
-      buildDrawer([], token);
+      buildLauncher([], token);
     }
   }
 
   function startLogin() {
-    buildDrawer([{ name: 'ログイン', fa: 'fa-solid fa-right-to-bracket', url: '#', _login: true }], null, function () {
+    buildLauncher([{ name: 'ログイン', fa: 'fa-solid fa-right-to-bracket', url: '#', _login: true }], null, function () {
       showModal(function () {
         destroy();
         extGet(['mgp_token', 'mgp_base_url'], function (r) { startApps(r.mgp_base_url, r.mgp_token); });

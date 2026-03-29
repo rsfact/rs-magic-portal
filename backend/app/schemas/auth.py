@@ -1,5 +1,6 @@
-""" RS Method - Auth Schemas v1.1.0"""
+""" RS Method - Auth Schemas v1.2.0"""
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
@@ -27,6 +28,14 @@ class ResTenantCreate(ResTenantBase):
 
 
 class ResTenantGet(ResTenantBase):
+    pass
+
+
+class ReqTenantSearch(ReqBasePagination):
+    pass
+
+
+class ResTenantSearch(ResBasePagination[ResTenantGet]):
     pass
 
 
@@ -82,7 +91,7 @@ class ResLogin(BaseModel):
 
 
 class ReqRefresh(BaseModel):
-    pass
+    expire_hours: Optional[int] = Field(None, example=336)
 
 
 class ResRefresh(BaseModel):

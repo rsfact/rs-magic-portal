@@ -1,4 +1,4 @@
-""" RS Method - Settings v1.1.0"""
+""" RS Method - Settings v1.2.0"""
 from typing import Optional
 import os
 
@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     JWT_SECRET: str
     JWT_MASTER_KEY: str
     JWT_DEFAULT_EXPIRE_HOURS: int = 24 * 14
+    JWT_REFRESH_MAX_EXPIRE_HOURS: int = 24 * 14
 
     # Encryption
     ENCRYPTION_KEY: str
