@@ -18,10 +18,10 @@ function set_status(msg, is_error = false) {
     el.classList.toggle("text-gray-500", !is_error);
 }
 
-async function refresh_token(expire_hours = null) {
+async function refresh_token(expire_seconds = null) {
     const token = get_auth_token();
     if (!token) return null;
-    const body = expire_hours ? { expire_hours } : {};
+    const body = expire_seconds ? { expire_seconds } : {};
     const res = await api_post("/auth/refresh", body, { headers: token_authorization_header(token) });
     if (res.ok && res.json?.success && res.json?.data?.token) {
         const next = res.json.data.token;
@@ -117,7 +117,7 @@ window.addEventListener("DOMContentLoaded", async () => {
         const getUrl = async () => {
             if (!app.url) return null;
             if (app.is_send_token_enabled) {
-                const t = await refresh_token(1);
+                const t = await refresh_token(30);
                 if (t) {
                     const sep = app.url.includes('#') ? '&' : '#';
                     return app.url + sep + 'token=' + encodeURIComponent(t);

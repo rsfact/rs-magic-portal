@@ -72,6 +72,31 @@ python3 -m alembic upgrade head
 python3 -m app.main
 ```
 
+```bash
+sudo tee /etc/systemd/system/mgp-api.service << 'EOF'
+[Unit]
+Description=Magic Portal - API
+After=network-online.target nginx.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/user/rs-magic-portal
+ExecStart=/bin/bash -c 'source /home/user/rs-magic-portal/backend/.venv/bin/activate && cd /home/user/rs-magic-portal/backend && python3 -m app.main'
+Restart=on-failure
+RestartSec=10s
+TimeoutStartSec=90
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable mgp-api.service
+sudo systemctl start mgp-api.service
+sudo systemctl status mgp-api.service
+```
+
 ## Frontend
 
 ### Web
@@ -80,13 +105,13 @@ python3 -m app.main
 cd frontend/web
 
 # Initialize
-sudo mkdir -p /usr/share/nginx/html/<server-name>.<domain>/mgp/ui
+sudo mkdir -p /var/www/<FQDN>/mgp/ui
 
-# If files already exists
-sudo rm -rf /usr/share/nginx/html/<server-name>.<domain>/mgp/ui/*
+# Cleanup
+sudo rm -rf /var/www/<FQDN>/mgp/ui/*
 
-# Copy files
-sudo cp -r ./* /usr/share/nginx/html/<server-name>.<domain>/mgp/ui/
+# Copy
+sudo cp -r ./* /var/www/<FQDN>/mgp/ui/
 ```
 
 ### Chrome Extension
@@ -109,13 +134,13 @@ scp -i ~/.ssh/keys/<server-name>.secret -P 10034 user@<IP>:/tmp/mgp-drawer.zip .
 ```bash
 server {
     listen 80;
-    server_name <server-name>.<domain>;
+    server_name <FQDN>;
 
     if ($http_x_forwarded_proto = "http") {
         return 301 https://$server_name$request_uri;
     }
 
-    root /usr/share/nginx/html/<server-name>.<domain>;
+    root /var/www/<FQDN>;
     index index.html;
 
     client_max_body_size 10G;

@@ -62,9 +62,12 @@
       cb(d && d.success && d.data ? d.data.token : null);
     });
   }
-  function refreshToken(base, token, expireHours, cb) {
-    authApi(base, 'refresh', token, { expire_hours: expireHours }, function (d) {
-      cb(d && d.success && d.data ? d.data.token : null);
+  function refreshToken(base, token, cb) {
+    authApi(base, 'refresh', token, { expire_seconds: 30 }, function (d) {
+      if (d && d.success && d.data) { cb(d.data.token); return; }
+      authApi(base, 'refresh', token, { expire_hours: 1 }, function (d2) {
+        cb(d2 && d2.success && d2.data ? d2.data.token : null);
+      });
     });
   }
 
@@ -183,7 +186,7 @@
         a.addEventListener('click', function (e) {
           e.preventDefault();
           extGet(['mgp_base_url'], function (r) {
-            refreshToken(r.mgp_base_url, token, 1, function (nextToken) {
+            refreshToken(r.mgp_base_url, token, function (nextToken) {
               var finalT = nextToken || token;
               if (nextToken) extSet({ mgp_token: nextToken }, function () {});
               window.open(appendToken(app.url, finalT), '_blank');

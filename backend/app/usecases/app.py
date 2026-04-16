@@ -16,7 +16,7 @@ def create(
         raise err.PermissionDenied()
 
     fa_icon = req.fa_icon if req.fa_icon else settings.DEFAULT_FA_ICON
-    position = crud.max_position_for_tenant(db, user.tenant.id) + 1
+    position = crud.max_position_for_tenant(db, user.tenant_id) + 1
     app = App(
         name=req.name,
         description=req.description,
@@ -24,7 +24,7 @@ def create(
         url=req.url,
         is_send_token_enabled=req.is_send_token_enabled,
         position=position,
-        tenant_id=user.tenant.id,
+        tenant_id=user.tenant_id,
         user_id=user.id,
     )
     created = crud.create(db, app)
@@ -37,7 +37,7 @@ def search(
     req: schema.ReqSearch, user: auth_schema.ResUserGet, db: Session
 ) -> schema.ResSearch:
     items, total = crud.get_paginated(
-        db, tenant_id=user.tenant.id, page=req.page, size=req.size
+        db, tenant_id=user.tenant_id, page=req.page, size=req.size
     )
     res_items = [schema.ResGet.model_validate(a) for a in items]
     return schema.ResSearch.paginate(
@@ -54,7 +54,7 @@ def update(
     if user.role not in [UserRole.ADMIN, UserRole.VENDOR]:
         raise err.PermissionDenied()
 
-    app = crud.get_by_tenant_and_id(db, user.tenant.id, id)
+    app = crud.get_by_tenant_and_id(db, user.tenant_id, id)
     if not app:
         raise err.AppNotFound()
 
@@ -69,12 +69,12 @@ def update(
     if req.fa_icon is not None:
         app.fa_icon = req.fa_icon
     if req.position is not None:
-        total = crud.count_for_tenant(db, user.tenant.id)
+        total = crud.count_for_tenant(db, user.tenant_id)
         new_pos = max(1, min(req.position, total))
         old_pos = app.position
         crud.shift_positions_on_move(
             db,
-            tenant_id=user.tenant.id,
+            tenant_id=user.tenant_id,
             moving_id=app.id,
             old_pos=old_pos,
             new_pos=new_pos,
@@ -93,9 +93,9 @@ def delete(
     if user.role not in [UserRole.ADMIN, UserRole.VENDOR]:
         raise err.PermissionDenied()
 
-    if not crud.get_by_tenant_and_id(db, user.tenant.id, id):
+    if not crud.get_by_tenant_and_id(db, user.tenant_id, id):
         raise err.AppNotFound()
 
-    crud.delete_by_tenant_and_id(db, user.tenant.id, id)
+    crud.delete_by_tenant_and_id(db, user.tenant_id, id)
     db.commit()
     return schema.ResDelete()
