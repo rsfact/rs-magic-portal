@@ -22,7 +22,7 @@ async function refresh_token(expire_hours = null) {
     const token = get_auth_token();
     if (!token) return null;
     const body = expire_hours ? { expire_hours } : {};
-    const res = await api_post("/auth/users/refresh", body, { headers: token_authorization_header(token) });
+    const res = await api_post("/auth/refresh", body, { headers: token_authorization_header(token) });
     if (res.ok && res.json?.success && res.json?.data?.token) {
         const next = res.json.data.token;
         set_auth_token(next);
@@ -34,7 +34,7 @@ async function refresh_token(expire_hours = null) {
 }
 
 async function load_profile(token) {
-    const res = await api_get("/auth/users/me", { headers: token_authorization_header(token) });
+    const res = await api_get("/auth/me", { headers: token_authorization_header(token) });
     if (res.ok && res.json?.success && res.json?.data) {
         return res.json.data;
     }

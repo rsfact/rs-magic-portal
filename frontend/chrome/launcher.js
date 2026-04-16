@@ -39,16 +39,33 @@
       .then(function (r) { return r.json(); });
   }
 
+  function authApi(base, endpoint, token, body, cb) {
+    var paths = ['/auth/users/' + endpoint, '/auth/' + endpoint];
+    var h = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+    if (token) h['Authorization'] = 'Bearer ' + token;
+    var init = { method: 'POST', headers: h, body: JSON.stringify(body) };
+    var tryPath = function (i) {
+      if (i >= paths.length) { cb(null); return; }
+      fetch(base.replace(/\/+$/, '') + '/api' + paths[i], init)
+        .then(function (r) {
+          if (r.status === 404 || r.status === 405) { tryPath(i + 1); return; }
+          return r.json().then(function (d) { cb(d); });
+        })
+        .catch(function () { tryPath(i + 1); });
+    };
+    tryPath(0);
+  }
+
   function tryLogin(base, email, pw, cb) {
     if (!base || !email || !pw) { cb(null); return; }
-    api(base, '/auth/users/login', null, { email: email, password: pw })
-      .then(function (d) { cb(d.success && d.data ? d.data.token : null); })
-      .catch(function () { cb(null); });
+    authApi(base, 'login', null, { email: email, password: pw }, function (d) {
+      cb(d && d.success && d.data ? d.data.token : null);
+    });
   }
   function refreshToken(base, token, expireHours, cb) {
-    api(base, '/auth/users/refresh', token, { expire_hours: expireHours })
-      .then(function (d) { cb(d.success && d.data ? d.data.token : null); })
-      .catch(function () { cb(null); });
+    authApi(base, 'refresh', token, { expire_hours: expireHours }, function (d) {
+      cb(d && d.success && d.data ? d.data.token : null);
+    });
   }
 
   function fetchApps(base, token, cb) {

@@ -1,4 +1,4 @@
-""" RS Method - Settings v1.2.0"""
+""" RS Method - Settings v1.3.0"""
 from typing import Optional
 import os
 
@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     )
 
     # Environment
-    APP_VERSION: str = "0.0.1"
+    APP_VERSION: str = "0.1.0"
     APP_NAME: str = "Magic Portal"
     APP_DESCRIPTION: str = ""
     APP_PORT: int
@@ -30,8 +30,9 @@ class Settings(BaseSettings):
     PB_BASE_URL: Optional[str] = Field(None)
     JWT_SECRET: str
     JWT_MASTER_KEY: str
-    JWT_DEFAULT_EXPIRE_HOURS: int = 24 * 14
-    JWT_REFRESH_MAX_EXPIRE_HOURS: int = 24 * 14
+    JWT_DEFAULT_EXPIRE_SECONDS: int = 24 * 14 * 60 * 60
+    JWT_REFRESH_MAX_EXPIRE_SECONDS: int = 24 * 14 * 60 * 60
+    JWT_HANDOFF_EXPIRE_SECONDS: int = 30
 
     # Encryption
     ENCRYPTION_KEY: str
@@ -50,6 +51,6 @@ class Settings(BaseSettings):
     DEFAULT_FA_ICON: str = "fa-solid fa-wand-magic-sparkles"
 
     # Database
-    DB_URL: str = "sqlite:///db.sqlite"
+    DB_URL: str
 
 settings = Settings()

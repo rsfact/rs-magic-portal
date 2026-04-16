@@ -1,4 +1,4 @@
-""" RS Method - Base Exception v1.0.0"""
+""" RS Method - Base Exception v1.1.0"""
 import re
 
 
@@ -14,17 +14,12 @@ class Base(Exception):
         code = re.sub(r'([a-z\d])([A-Z])', r'\1_\2', code)
         return code.upper()
 
-
 class Internal(Base):
     status_code = 500
 
 
-class NotFound(Base):
-    status_code = 404
-
-
-class Conflict(Base):
-    status_code = 409
+class BadRequest(Base):
+    status_code = 400
 
 
 class Authentication(Base):
@@ -35,5 +30,9 @@ class Authorization(Base):
     status_code = 403
 
 
-class Validation(Base):
-    status_code = 400
+class NotFound(Base):
+    status_code = 404
+
+
+class Conflict(Base):
+    status_code = 409

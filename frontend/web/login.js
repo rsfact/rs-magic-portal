@@ -20,7 +20,7 @@ async function submit_login(e) {
     status.textContent = "ログイン中...";
 
     try {
-        const res = await api_post("/auth/users/login", { email, password });
+        const res = await api_post("/auth/login", { email, password });
         if (res.ok && res.json?.success && res.json?.data?.token) {
             set_auth_token(res.json.data.token);
             window.location.assign(INDEX_URL);

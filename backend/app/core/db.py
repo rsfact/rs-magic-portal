@@ -1,34 +1,20 @@
-""" RS Method - Database Controller v1.2.0"""
+"""RS Method - Database Controller v2.0.0"""
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 
 from app.core.settings import settings
 from app.core.logger import logger
 
 
-def _build_engine():
-    url = settings.DB_URL
-
-    # SQLite
-    if url.startswith("sqlite"):
-        return create_engine(
-            url,
-            connect_args={"check_same_thread": False},
-        )
-
-    # PostgreSQL / MySQL
-    return create_engine(
-        url,
-        pool_recycle=86400,
-        pool_pre_ping=True,
-        pool_size=10,
-        max_overflow=20,
-        pool_timeout=60,
-        connect_args={"connect_timeout": 60},
-    )
-
-
-engine = _build_engine()
+engine = create_engine(
+    settings.DB_URL,
+    pool_recycle=86400,
+    pool_pre_ping=True,
+    pool_size=10,
+    max_overflow=20,
+    pool_timeout=60,
+    connect_args={"connect_timeout": 60},
+)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -51,3 +37,7 @@ def get_db():
         raise
     finally:
         db.close()
+
+
+def set_tenant_context(db: Session, tenant_id: str):
+    db.execute(text("SET app.current_tenant_id = :tid"), {"tid": tenant_id})

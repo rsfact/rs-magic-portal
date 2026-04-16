@@ -45,14 +45,22 @@ document.getElementById('login').addEventListener('click', function () {
   var email = emailEl.value.trim();
   var pw = passwordEl.value.trim();
   if (!base || !email || !pw) { flash(authStatusEl, 'すべて入力してください', '#FF5151'); return; }
-  fetch(base + '/api/auth/users/login', {
+  var paths = ['/api/auth/users/login', '/api/auth/login'];
+  var init = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
     body: JSON.stringify({ email: email, password: pw })
-  })
-    .then(function (r) { return r.json(); })
-    .then(function (d) { return d.success && d.data ? d.data.token : null; })
-    .catch(function () { return null; })
+  };
+  var loginAttempt = function (i) {
+    if (i >= paths.length) return Promise.resolve(null);
+    return fetch(base + paths[i], init)
+      .then(function (r) {
+        if (r.status === 404 || r.status === 405) return loginAttempt(i + 1);
+        return r.json().then(function (d) { return d.success && d.data ? d.data.token : null; });
+      })
+      .catch(function () { return loginAttempt(i + 1); });
+  };
+  loginAttempt(0)
     .then(function (token) {
       if (!token) { flash(authStatusEl, '認証に失敗しました', '#FF5151'); return; }
       chrome.storage.local.set({ mgp_token: token, mgp_email: email, mgp_base_url: base }, function () {

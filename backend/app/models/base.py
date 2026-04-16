@@ -1,5 +1,6 @@
-""" RS Method - Base Model v1.0.0"""
-from sqlalchemy.ext.declarative import declarative_base
+""" RS Method - Base Model v1.1.0"""
+from sqlalchemy.orm import DeclarativeBase
 
 
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass

@@ -1,3 +1,4 @@
+"""RS Method - Authentication v1.3.0"""
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 import uuid
@@ -43,14 +44,16 @@ def verify_jwt(role: Optional[str] = None):
 
             user_role = payload.get("role", "") or ""
             if role and user_role != role:
-                raise err.PermissionDenied(msg=f"`{role}` is required.")
+                raise err.PermissionDenied
 
             return schema.ResJwtDecode(
                 sub=payload["sub"],
                 iat=datetime.fromtimestamp(payload["iat"], tz=timezone.utc),
                 exp=datetime.fromtimestamp(payload["exp"], tz=timezone.utc),
                 jti=payload["jti"],
-                role=user_role,
+                email=payload["email"],
+                role=payload["role"],
+                tenant_id=payload["tenant_id"],
             )
         except jwt.ExpiredSignatureError as e:
             logger.warning(f"Token has expired: {str(e)}")
@@ -71,24 +74,37 @@ def get_user(
     jwt: schema.ResJwtDecode = Security(verify_jwt()),
     db: Session = Depends(get_db),
 ) -> schema.ResUserGet:
-    return usecase._get_user(jwt, db)
+    return usecase.get_user(jwt, db)
+
+
+def get_tenant_db(
+    jwt: schema.ResJwtDecode = Security(verify_jwt()),
+    db: Session = Depends(get_db),
+):
+    from app.core.db import set_tenant_context
+    set_tenant_context(db, jwt.tenant_id)
+    yield db
 
 
 # ========== JWT ==========
 
 def create_jwt(
     sub: str,
+    email: str,
     role: str,
+    tenant_id: str,
     expires_at: Optional[datetime] = None,
 ) -> str:
     now = datetime.now(timezone.utc)
-    exp = expires_at if expires_at else now + timedelta(hours=settings.JWT_DEFAULT_EXPIRE_HOURS)
+    exp = expires_at if expires_at else now + timedelta(seconds=settings.JWT_DEFAULT_EXPIRE_SECONDS)
     claims = {
         "sub": sub,
         "exp": exp,
         "iat": now,
         "jti": str(uuid.uuid4()),
+        "email": email,
         "role": role,
+        "tenant_id": tenant_id
     }
     return jwt.encode(claims, settings.JWT_SECRET, algorithm="HS256")
 

@@ -1,4 +1,4 @@
-""" RS Method - Base Schemas v1.0.0"""
+""" RS Method - Base Schemas v1.1.0"""
 from datetime import datetime, timezone, timedelta
 from typing import Optional, List, Generic, TypeVar
 
@@ -20,14 +20,14 @@ class BaseResponse(BaseModel, Generic[T]):
     errors: Optional[List[ErrorDetail]] = None
 
     @classmethod
-    def create_success(cls, data: T = None):
-        return cls(success=True, data=data if data is not None else {}, errors=[])
+    def create_success(cls, data: T | None = None):
+        return cls(success=True, data=data, errors=[])
 
     @classmethod
-    def create_warning(cls, data: T = None, errors: List[ErrorDetail] = None):
+    def create_warning(cls, data: T | None = None, errors: List[ErrorDetail] | None = None):
         return cls(
             success=True,
-            data=data if data is not None else {},
+            data=data,
             errors=errors if errors is not None else [],
         )
 
@@ -35,7 +35,7 @@ class BaseResponse(BaseModel, Generic[T]):
     def create_error(cls, errors: List[ErrorDetail]):
         return cls(
             success=False,
-            data={},
+            data=None,
             errors=errors
         )
 
@@ -43,18 +43,18 @@ class BaseResponse(BaseModel, Generic[T]):
 # ========== Pagination ==========
 
 class ReqBasePagination(BaseModel):
-    page: int = Field(1, ge=1, example=1)
-    size: int = Field(10, ge=1, example=10)
+    page: int = Field(default=1, ge=1, examples=[1])
+    size: int = Field(default=10, ge=1, examples=[10])
 
 
 class ResBasePagination(BaseModel, Generic[T]):
-    total: int = Field(..., example=0)
-    pages: int = Field(..., example=1)
-    page: int = Field(..., example=1)
-    size: int = Field(..., example=10)
-    has_next: bool = Field(..., example=False)
-    has_prev: bool = Field(..., example=False)
-    items: List[T] = Field(..., example=[])
+    total: int = Field(..., examples=[0])
+    pages: int = Field(..., examples=[1])
+    page: int = Field(..., examples=[1])
+    size: int = Field(..., examples=[10])
+    has_next: bool = Field(..., examples=[False])
+    has_prev: bool = Field(..., examples=[False])
+    items: List[T] = Field(..., examples=[[]])
 
     @classmethod
     def paginate(

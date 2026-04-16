@@ -50,7 +50,7 @@ const start = () => {
         async refreshToken() {
             const t = get_auth_token();
             if (!t) return null;
-            const res = await api_post("/auth/users/refresh", {}, { headers: token_authorization_header(t) });
+            const res = await api_post("/auth/refresh", {}, { headers: token_authorization_header(t) });
             if (res.ok && res.json?.success && res.json?.data?.token) {
                 set_auth_token(res.json.data.token);
                 return res.json.data.token;
@@ -60,7 +60,7 @@ const start = () => {
         },
 
         async loadProfile() {
-            const res = await api_get("/auth/users/me", { headers: token_authorization_header(this.token) });
+            const res = await api_get("/auth/me", { headers: token_authorization_header(this.token) });
             return (res.ok && res.json?.success) ? res.json.data : null;
         },
 
