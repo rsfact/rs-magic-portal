@@ -1,4 +1,4 @@
-""" RS Method - Auth Router v1.3.0 """
+""" RS Method - Auth Router v1.4.0 """
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
@@ -59,6 +59,22 @@ def handoff(
     - なお、転送用JWTの想定有効期限は 30 秒です。
     """
     result = usecase.handoff(jwt, db)
+    return BaseResponse.create_success(result)
+
+
+@router.post("/impersonate", response_model=BaseResponse[schema.ResImpersonate])
+def impersonate(
+    req: schema.ReqImpersonate,
+    jwt: schema.ResJwtDecode = Depends(verify_jwt()),
+    db: Session = Depends(get_db),
+):
+    """
+    - `role=admin` 以上のみ実行できます。
+    - 自テナント内のユーザーのみ指定可能です。
+    - 指定ユーザーになりすましたJWTを発行します。
+    - 有効期限は分単位で指定可能で、最大60分です。
+    """
+    result = usecase.impersonate(req, jwt, db)
     return BaseResponse.create_success(result)
 
 

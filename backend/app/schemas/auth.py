@@ -1,4 +1,4 @@
-"""RS Method - Auth Schemas v1.4.0"""
+"""RS Method - Auth Schemas v1.5.0"""
 from datetime import datetime
 from typing import Optional
 
@@ -12,16 +12,16 @@ from app.schemas.base import timezone_util, ReqBasePagination, ResBasePagination
 # ========== Tenant ==========
 
 class ResTenantBase(BaseModel):
-    id: str = Field(description="Tenant ID", examples=["123e4567-e89b-12d3-a456-426614174000"])
-    code: str = Field(description="Tenant code", examples=["rsf"])
-    name: str = Field(description="Tenant name", examples=["RSfact"])
+    id: str = Field(examples=["123e4567-e89b-12d3-a456-426614174000"])
+    code: str = Field(examples=["rsf"])
+    name: str = Field(examples=["RSfact"])
 
     model_config = ConfigDict(from_attributes=True)
 
 
 class ReqTenantCreate(BaseModel):
-    code: str = Field(min_length=1, description="Tenant code", examples=["rsf"])
-    name: str = Field(min_length=1, description="Tenant name", examples=["RSfact"])
+    code: str = Field(min_length=1, examples=["rsf"])
+    name: str = Field(min_length=1, examples=["RSfact"])
 
 
 class ResTenantCreate(ResTenantBase):
@@ -43,12 +43,12 @@ class ResTenantSearch(ResBasePagination[ResTenantGet]):
 # ========== User ==========
 
 class ResUserBase(BaseModel):
-    id: str = Field(description="User ID", examples=["123e4567-e89b-12d3-a456-426614174000"])
-    created_at: datetime = Field(description="Created at", examples=["2050-12-31T23:59:59+09:00"])
-    tenant_id: str = Field(description="Tenant ID", examples=["123e4567-e89b-12d3-a456-426614174000"])
-    name: str = Field(description="User name", examples=["John Doe"])
-    role: UserRole = Field(description="User role", examples=["user"])
-    email: EmailStr = Field(description="Email", examples=["john.doe@example.com"])
+    id: str = Field(examples=["123e4567-e89b-12d3-a456-426614174000"])
+    created_at: datetime = Field(examples=["2050-12-31T23:59:59+09:00"])
+    tenant_id: str = Field(examples=["123e4567-e89b-12d3-a456-426614174000"])
+    name: str = Field(examples=["John Doe"])
+    role: UserRole = Field(examples=["user"])
+    email: EmailStr = Field(examples=["john.doe@example.com"])
 
     @field_validator("created_at")
     @classmethod
@@ -59,10 +59,10 @@ class ResUserBase(BaseModel):
 
 
 class ReqUserCreate(BaseModel):
-    name: str = Field(min_length=1, description="User name", examples=["John Doe"])
-    role: UserRole = Field(default=UserRole.USER, description="User role", examples=["user"])
-    email: EmailStr = Field(description="Email", examples=["john.doe@example.com"])
-    password: str = Field(min_length=1, description="Password", examples=["password123"])
+    name: str = Field(min_length=1, examples=["John Doe"])
+    role: UserRole = Field(default=UserRole.USER, examples=["user"])
+    email: EmailStr = Field(examples=["john.doe@example.com"])
+    password: str = Field(min_length=1, examples=["password123"])
 
 
 class ResUserCreate(ResUserBase):
@@ -84,12 +84,12 @@ class ResUserSearch(ResBasePagination[ResUserGet]):
 # ========== Auth ==========
 
 class ReqLogin(BaseModel):
-    email: EmailStr = Field(description="Email", examples=["john.doe@example.com"])
-    password: str = Field(min_length=1, description="Password", examples=["password123"])
+    email: EmailStr = Field(examples=["john.doe@example.com"])
+    password: str = Field(min_length=1, examples=["password123"])
 
 
 class ResLogin(BaseModel):
-    token: str = Field(min_length=1, description="JWT token", examples=["ey..."])
+    token: str = Field(min_length=1, examples=["ey..."])
     user: ResUserGet
 
 
@@ -101,6 +101,15 @@ class ReqRefresh(BaseModel):
         description="Custom expiry seconds",
         examples=[settings.JWT_REFRESH_MAX_EXPIRE_SECONDS],
     )
+
+
+class ReqImpersonate(BaseModel):
+    user_id: str = Field(examples=["123e4567-e89b-12d3-a456-426614174000"])
+    expire_minutes: int = Field(ge=1, le=60, description="有効期限（分）、最大60分", examples=[30])
+
+
+class ResImpersonate(ResLogin):
+    pass
 
 
 class ResRefresh(ResLogin):
@@ -118,8 +127,8 @@ class ResHandoff(ResLogin):
 # ========== Custom JWT for Admin ==========
 
 class ReqJwtCreate(BaseModel):
-    user_id: str = Field(description="User ID", examples=["123e4567-e89b-12d3-a456-426614174000"])
-    expires_at: datetime = Field(description="Expiry", examples=["2050-12-31T23:59:59+09:00"])
+    user_id: str = Field(examples=["123e4567-e89b-12d3-a456-426614174000"])
+    expires_at: datetime = Field(examples=["2050-12-31T23:59:59+09:00"])
 
     @field_validator("expires_at")
     @classmethod
@@ -128,7 +137,7 @@ class ReqJwtCreate(BaseModel):
 
 
 class ResJwtCreate(BaseModel):
-    token: str = Field(min_length=1, description="JWT token", examples=["ey..."])
+    token: str = Field(min_length=1, examples=["ey..."])
     user: ResUserGet
 
 
@@ -137,13 +146,13 @@ class ReqJwtDecode(BaseModel):
 
 
 class ResJwtDecode(BaseModel):
-    sub: str = Field(description="User ID", min_length=1, examples=["123e4567-e89b-12d3-a456-426614174000"])
-    exp: datetime = Field(description="Expiry", examples=["2050-12-31T23:59:59+09:00"])
-    iat: datetime = Field(description="Issued at", examples=["2050-12-31T22:59:59+09:00"])
-    jti: str = Field(description="Token ID", min_length=1, examples=["550e8400-e29b-41d4-a716-446655440000"])
-    email: EmailStr = Field(description="Email", examples=["john.doe@example.com"])
-    role: UserRole = Field(description="User role", examples=["user"])
-    tenant_id: str = Field(description="Tenant ID", examples=["123e4567-e89b-12d3-a456-426614174000"])
+    sub: str = Field(min_length=1, examples=["123e4567-e89b-12d3-a456-426614174000"])
+    exp: datetime = Field(examples=["2050-12-31T23:59:59+09:00"])
+    iat: datetime = Field(examples=["2050-12-31T22:59:59+09:00"])
+    jti: str = Field(min_length=1, examples=["550e8400-e29b-41d4-a716-446655440000"])
+    email: EmailStr = Field(examples=["john.doe@example.com"])
+    role: UserRole = Field(examples=["user"])
+    tenant_id: str = Field(examples=["123e4567-e89b-12d3-a456-426614174000"])
 
     @field_validator("exp", "iat")
     @classmethod

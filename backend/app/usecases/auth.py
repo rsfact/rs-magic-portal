@@ -1,4 +1,4 @@
-"""RS Method - Auth Usecases v1.3.0"""
+"""RS Method - Auth Usecases v1.4.0"""
 from datetime import datetime, timedelta, timezone
 
 from sqlalchemy.orm import Session
@@ -18,7 +18,7 @@ from app.cruds import auth as crud
 def login(req: schema.ReqLogin, db: Session) -> schema.ResLogin:
     # 1. Authenticate
     if settings.AUTH_MODE == AuthProvider.LOCAL.value:
-        user = crud.get_user_by_email(db, req.email)
+        user = db.query(User).filter(User.email == req.email).first()
         if not user:
             raise err.Login()
         if not auth.verify_password(req.password, user.pw_hash):
@@ -46,7 +46,7 @@ def login(req: schema.ReqLogin, db: Session) -> schema.ResLogin:
             tenant_for_user = crud.create_tenant(db, tenant)
 
         # 3. Sync user
-        existing_user = crud.get_user_by_email(db, pb_user.email)
+        existing_user = db.query(User).filter(User.email == pb_user.email).first()
 
         # 3-1. Update user
         if existing_user:
@@ -94,7 +94,7 @@ def refresh(req: schema.ReqRefresh, jwt: schema.ResJwtDecode, db: Session) -> sc
             raise err.TokenExpireSecondsTooLarge()
         expire_seconds = req.expire_seconds
 
-    user = crud.get_user_by_id(db, jwt.sub)
+    user = crud.get_user_by_id(db, jwt.sub, jwt.tenant_id)
     if not user:
         raise err.UserNotFound()
 
@@ -115,7 +115,7 @@ def refresh(req: schema.ReqRefresh, jwt: schema.ResJwtDecode, db: Session) -> sc
 
 
 def handoff(jwt: schema.ResJwtDecode, db: Session) -> schema.ResHandoff:
-    user = crud.get_user_by_email(db, jwt.email)
+    user = crud.get_user_by_email(db, jwt.email, tenant_id=jwt.tenant_id)
     if not user:
         raise err.Login()
 
@@ -132,6 +132,31 @@ def handoff(jwt: schema.ResJwtDecode, db: Session) -> schema.ResHandoff:
     )
 
 
+def impersonate(req: schema.ReqImpersonate, jwt: schema.ResJwtDecode, db: Session) -> schema.ResImpersonate:
+    if jwt.role not in [UserRole.ADMIN, UserRole.VENDOR]:
+        raise err.PermissionDenied()
+
+    tenant_id = jwt.tenant_id if jwt.role == UserRole.ADMIN else None
+    user = crud.get_user_by_id(db, req.user_id, tenant_id)
+    if not user:
+        raise err.UserNotFound()
+
+    expires_at = datetime.now(timezone.utc) + timedelta(minutes=req.expire_minutes)
+
+    token = auth.create_jwt(
+        sub=user.id,
+        email=user.email,
+        role=user.role.value,
+        tenant_id=user.tenant_id,
+        expires_at=expires_at,
+    )
+
+    return schema.ResImpersonate(
+        token=token,
+        user=schema.ResUserGet.model_validate(user),
+    )
+
+
 def get_my_profile(user: schema.ResUserGet) -> schema.ResUserGet:
     return schema.ResUserGet.model_validate(user)
 
@@ -139,7 +164,7 @@ def get_my_profile(user: schema.ResUserGet) -> schema.ResUserGet:
 # ========== User / Tenant Management ==========
 
 def get_user(jwt: schema.ResJwtDecode, db: Session) -> schema.ResUserGet:
-    user = crud.get_user_by_id(db, jwt.sub)
+    user = crud.get_user_by_id(db, jwt.sub, jwt.tenant_id)
     if not user:
         raise err.UserNotFound()
 
@@ -208,9 +233,8 @@ def signup(tenant_id: str, req: schema.ReqUserCreate, db: Session) -> schema.Res
     if not tenant:
         raise err.TenantNotFound()
 
-    # Check duplicate email
-    existing_user = crud.get_user_by_email(db, req.email)
-    if existing_user:
+    # Check duplicate email (global uniqueness)
+    if crud.exists_email(db, req.email):
         raise err.UserAlreadyExists()
 
     # Create user
@@ -231,7 +255,7 @@ def signup(tenant_id: str, req: schema.ReqUserCreate, db: Session) -> schema.Res
 
 def encode_jwt(req: schema.ReqJwtCreate, db: Session) -> schema.ResJwtCreate:
     # Verify user exists
-    user = crud.get_user_by_id(db, req.user_id)
+    user = crud.get_user_by_id(db, req.user_id, None)
     if not user:
         raise err.UserNotFound()
 

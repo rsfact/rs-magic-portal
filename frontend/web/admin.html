@@ -27,9 +27,16 @@
                         <p class="text-xs text-slate-400 font-normal">Magic Portal の登録アプリを管理します</p>
                     </div>
                 </div>
-                <a href="./index.html" class="bg-white border border-slate-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm text-slate-600">
-                    <i class="fa-solid fa-house mr-2 text-xs"></i>ホーム
-                </a>
+                <div class="flex items-center gap-4">
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" x-model="isMagicLoginEnabled" @change="toggleMagicLogin" class="sr-only peer">
+                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
+                        <span class="ml-2 text-sm font-medium transition-colors" :class="isMagicLoginEnabled ? 'text-[var(--color-primary)]' : 'text-slate-400'"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>マジックログイン</span>
+                    </label>
+                    <a href="./index.html" class="bg-white border border-slate-200 px-5 py-2 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors shadow-sm text-slate-600">
+                        <i class="fa-solid fa-house mr-2 text-xs"></i>ホーム
+                    </a>
+                </div>
             </header>
 
             <div x-show="gateMsg" x-transition x-text="gateMsg" class="bg-red-50 text-[var(--color-danger)] p-4 rounded-lg text-sm mb-6 border border-red-100" x-cloak></div>

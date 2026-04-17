@@ -1,4 +1,4 @@
-"""RS Method - Auth CRUD v1.3.0"""
+"""RS Method - Auth CRUD v1.4.0"""
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -54,13 +54,20 @@ def get_paginated_users_by_tenant_id(
     return total, items
 
 
-def get_user_by_id(db: Session, id: str) -> Optional[User]:
-    return db.query(User).filter(User.id == id).first()
+def get_user_by_id(db: Session, id: str, tenant_id: Optional[str]) -> Optional[User]:
+    query = db.query(User).filter(User.id == id)
+    if tenant_id is not None:
+        query = query.filter(User.tenant_id == tenant_id)
+    return query.first()
 
 
-def get_user_by_idp_id(db: Session, idp_id: str) -> Optional[User]:
-    return db.query(User).filter(User.idp_id == idp_id).first()
+def get_user_by_idp_id(db: Session, idp_id: str, tenant_id: str) -> Optional[User]:
+    return db.query(User).filter(User.idp_id == idp_id, User.tenant_id == tenant_id).first()
 
 
-def get_user_by_email(db: Session, email: str) -> Optional[User]:
-    return db.query(User).filter(User.email == email).first()
+def get_user_by_email(db: Session, email: str, tenant_id: str) -> Optional[User]:
+    return db.query(User).filter(User.email == email, User.tenant_id == tenant_id).first()
+
+
+def exists_email(db: Session, email: str) -> bool:
+    return db.query(User).filter(User.email == email).first() is not None

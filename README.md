@@ -28,7 +28,17 @@ PocketCore内PocketBaseに依存。
 フロントエンド環境変数で切替。
 
 - Normal — ログイン中ユーザーのJWTをfragment付与して遷移
-- NFC — NFCタッチ → 環境変数の正規表現でURLからUserID抽出 → 臨時エンドポイントで対象JWTを取得 → fragment付与して遷移
+- Magic Login — NFCタッチ → `NFC_USER_ID_PATTERN`（config.js）でNDEFレコードからUserID抽出 → `/auth/impersonate`で対象ユーザーのJWTを取得 → fragment付与して遷移
+
+### Magic Login
+
+管理画面のトグルで有効化。状態は`mgp_is_enable_magic_login`としてLocalStorageに保持。
+
+有効時、自動ログイン対象アプリの起動フローが変わる。起動ボタン押下でNFC待機モーダルを表示し、Magic Card（NFC）のタッチを待つ。カードのNDEFレコード（URLまたはテキスト）を`NFC_USER_ID_PATTERN`（config.js）で照合し、キャプチャグループからUserIDを抽出。`POST /auth/impersonate`で当該ユーザーの短命JWT（1分）を取得し、`#token=...`付きURLへ遷移する。
+
+無効時は従来どおり、ログイン中ユーザー自身のJWTで遷移する。
+
+Web NFC API（Chrome Android 89+、HTTPS必須）を使用。非対応ブラウザではエラーを表示する。
 
 ## Permission Model
 
