@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MGP Launcher",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "マジックポータル™ に接続します。",
   "permissions": [
     "storage"
