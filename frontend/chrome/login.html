@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>マジックポータル™ ログイン</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * { margin: 0; box-sizing: border-box; }
+    body { min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #e8ecf8 0%, #f0f2f8 40%, #fef3ec 100%); padding: 20px; }
+    .card { width: 100%; max-width: 360px; background: rgba(255,255,255,.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,.6); border-radius: 16px; padding: 32px 28px; box-shadow: 0 2px 8px rgba(121,155,249,.06), 0 1px 2px rgba(0,0,0,.04); }
+    h1 { font-size: 16px; font-weight: 700; color: #2d3348; margin-bottom: 24px; text-align: center; }
+    label { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 6px; }
+    input { width: 100%; padding: 10px 12px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 13px; outline: none; color: #334155; transition: border-color .2s; }
+    input::placeholder { color: #cbd5e1; }
+    input:focus { border-color: #799BF9; }
+    .row { margin-bottom: 16px; }
+    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 20px 0; }
+    .btn { width: 100%; padding: 11px; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: transform .15s, box-shadow .25s, opacity .2s; }
+    .btn-primary { background: linear-gradient(135deg, #799BF9, #6b8cf5); color: #fff; box-shadow: 0 2px 8px rgba(121,155,249,.3); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 16px rgba(121,155,249,.35); }
+    .btn-primary:active { transform: translateY(0) scale(.98); }
+    .status { font-size: 12px; margin-top: 12px; text-align: center; min-height: 1.2em; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>マジックポータル&trade;</h1>
+    <div class="row">
+      <label>サーバURL</label>
+      <input type="text" id="baseUrl" placeholder="https://example.com">
+    </div>
+    <hr class="divider">
+    <div class="row">
+      <label>メールアドレス</label>
+      <input type="email" id="email" placeholder="user@example.com">
+    </div>
+    <div class="row">
+      <label>パスワード</label>
+      <input type="password" id="password" placeholder="password">
+    </div>
+    <button class="btn btn-primary" id="save">ログイン</button>
+    <div class="status" id="status"></div>
+  </div>
+  <script src="login.js"></script>
+</body>
+</html>

@@ -6,13 +6,16 @@
   "permissions": [
     "storage"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "action": {
     "default_popup": "popup.html",
-    "default_icon": "icon.png"
+    "default_icon": "logo.png"
   },
   "icons": {
-    "48": "icon.png",
-    "128": "icon.png"
+    "48": "logo.png",
+    "128": "logo.png"
   },
   "content_scripts": [
     {

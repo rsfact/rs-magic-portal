@@ -95,7 +95,7 @@ const start = () => {
             this.status = { msg: '保存中...', isErr: false };
             const isEdit = !!this.formData.id;
             const res = await (isEdit ? api_patch : api_post)(
-                isEdit ? `/v1/apps/${encodeURIComponent(this.formData.id)}` : "/v1/apps/create",
+                isEdit ? `/v1/apps/${encodeURIComponent(this.formData.id)}` : "/v1/apps",
                 this.formData,
                 { headers: token_authorization_header(this.token) }
             );

@@ -12,7 +12,8 @@ from app.usecases import app as usecase
 router = APIRouter()
 
 
-@router.post("/create", response_model=BaseResponse[schema.ResCreate])
+@router.post("", response_model=BaseResponse[schema.ResCreate])
+@router.post("/create", response_model=BaseResponse[schema.ResCreate], include_in_schema=False)
 def create(
     req: schema.ReqCreate,
     _: auth_schema.ResJwtDecode = Depends(verify_jwt()),

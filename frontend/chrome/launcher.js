@@ -1,6 +1,7 @@
 (function () {
   var IS_EXT = typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getURL;
   var MAX_SLOTS = 8;
+  var ROOT_ID = 'magic-portal-injection';
   var GRADIENTS = [
     ['#799BF9', '#f472b6'], ['#FFA775', '#facc15'], ['#FF5151', '#FFA775'],
     ['#facc15', '#4ade80'], ['#f472b6', '#799BF9'], ['#4ade80', '#799BF9'],
@@ -56,12 +57,6 @@
     tryPath(0);
   }
 
-  function tryLogin(base, email, pw, cb) {
-    if (!base || !email || !pw) { cb(null); return; }
-    authApi(base, 'login', null, { email: email, password: pw }, function (d) {
-      cb(d && d.success && d.data ? d.data.token : null);
-    });
-  }
   function refreshToken(base, token, cb) {
     authApi(base, 'refresh', token, { expire_seconds: 30 }, function (d) {
       if (d && d.success && d.data) { cb(d.data.token); return; }
@@ -96,6 +91,15 @@
     return url + sep + 'token=' + encodeURIComponent(token);
   }
 
+  function createRoot() {
+    var existing = document.getElementById(ROOT_ID);
+    if (existing) existing.remove();
+    var root = document.createElement('div');
+    root.id = ROOT_ID;
+    document.body.appendChild(root);
+    return root;
+  }
+
   function injectDeps() {
     if (!document.querySelector('link[href*="font-awesome"]')) {
       var l = document.createElement('link');
@@ -111,60 +115,30 @@
     }
   }
 
-  function destroy() {
-    document.querySelectorAll('.mgp-ripple,.mgp-wrap,.mgp-modal-bg').forEach(function (el) { el.remove(); });
-  }
-
-  function showModal(onSuccess) {
-    var bg = document.createElement('div');
-    bg.className = 'mgp-modal-bg';
-    bg.innerHTML =
-      '<div class="mgp-modal"><h3>Magic Portal</h3><p>ログインしてください</p><form>' +
-      '<input type="text" id="mgp-m-base" placeholder="API Base URL" autocomplete="off">' +
-      '<input type="email" id="mgp-m-email" placeholder="メールアドレス" autocomplete="off">' +
-      '<input type="password" id="mgp-m-pw" placeholder="パスワード" autocomplete="off">' +
-      '<button type="submit">ログイン</button><div class="mgp-err" id="mgp-m-err"></div></form></div>';
-    document.body.appendChild(bg);
-    bg.querySelector('#mgp-m-base').focus();
-    bg.addEventListener('click', function (e) { if (e.target === bg) bg.remove(); });
-    extGet(['mgp_base_url'], function (r) {
-      if (r.mgp_base_url) bg.querySelector('#mgp-m-base').value = r.mgp_base_url;
-    });
-    bg.querySelector('form').addEventListener('submit', function (e) {
-      e.preventDefault();
-      var base = bg.querySelector('#mgp-m-base').value.trim();
-      var email = bg.querySelector('#mgp-m-email').value.trim();
-      var pw = bg.querySelector('#mgp-m-pw').value.trim();
-      var err = bg.querySelector('#mgp-m-err');
-      if (!base || !email || !pw) { err.textContent = 'すべて入力してください'; err.style.display = 'block'; return; }
-      tryLogin(base, email, pw, function (token) {
-        if (!token) { err.textContent = '認証に失敗しました'; err.style.display = 'block'; return; }
-        extSet({ mgp_token: token, mgp_base_url: base, mgp_email: email }, function () { bg.remove(); onSuccess(); });
-      });
-    });
-  }
-
   function padSlots(apps) {
     var list = apps.slice(0, MAX_SLOTS);
     while (list.length < MAX_SLOTS) list.push({ _empty: true });
     return list;
   }
 
-  function buildLauncher(apps, token, onLoginClick) {
+  function buildLauncher(root, apps, token) {
     var slots = padSlots(apps);
+
     var ripple = document.createElement('div');
     ripple.className = 'mgp-ripple';
     ripple.innerHTML = '<div></div><div></div><div></div>';
-    document.body.appendChild(ripple);
+    root.appendChild(ripple);
+
     var wrap = document.createElement('div');
     wrap.className = 'mgp-wrap';
-    document.body.appendChild(wrap);
+    root.appendChild(wrap);
 
     var els = slots.map(function (app, i) {
       var a = document.createElement('a');
-      a.href = (app._empty || app._login || app.is_send_token_enabled) ? '#' : (app.url || '#');
+      a.href = (app._empty || app.is_send_token_enabled) ? '#' : (app.url || '#');
       a.className = 'mgp-item' + (app._empty ? ' mgp-empty' : '');
-      if (!app._login && !app._empty && !app.is_send_token_enabled) a.target = '_blank';
+      if (!app._empty && !app.is_send_token_enabled) a.target = '_blank';
+
       var icon = document.createElement('div');
       icon.className = 'mgp-icon' + (app._empty ? ' mgp-empty-icon' : '');
       if (app._empty) {
@@ -175,26 +149,32 @@
         icon.innerHTML = '<i class="' + (app.fa || 'fa-solid fa-cube') + '"></i>';
       }
       a.appendChild(icon);
+
       if (!app._empty) {
         var tip = document.createElement('span');
         tip.className = 'mgp-tip';
         tip.textContent = app.name || '';
         a.appendChild(tip);
       }
-      if (app._login && onLoginClick) a.addEventListener('click', function (e) { e.preventDefault(); onLoginClick(); });
-      if (app.is_send_token_enabled && !app._empty) {
+
+      if (app._settings) {
+        a.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (IS_EXT) chrome.runtime.sendMessage({ action: 'openSettings' });
+        });
+      } else if (app.is_send_token_enabled && !app._empty) {
         a.addEventListener('click', function (e) {
           e.preventDefault();
           extGet(['mgp_base_url'], function (r) {
             refreshToken(r.mgp_base_url, token, function (nextToken) {
-              var finalT = nextToken || token;
-              if (nextToken) extSet({ mgp_token: nextToken }, function () {});
-              window.open(appendToken(app.url, finalT), '_blank');
+              window.open(appendToken(app.url, nextToken || token), '_blank');
             });
           });
         });
       }
+
       if (app._empty) a.addEventListener('click', function (e) { e.preventDefault(); });
+
       wrap.appendChild(a);
       return a;
     });
@@ -237,29 +217,20 @@
     });
   }
 
-  function startApps(base, token) {
-    if (base) {
-      fetchApps(base, token, function (apps) { buildLauncher(apps, token); });
-    } else {
-      buildLauncher([], token);
-    }
-  }
-
-  function startLogin() {
-    buildLauncher([{ name: 'ログイン', fa: 'fa-solid fa-right-to-bracket', url: '#', _login: true }], null, function () {
-      showModal(function () {
-        destroy();
-        extGet(['mgp_token', 'mgp_base_url'], function (r) { startApps(r.mgp_base_url, r.mgp_token); });
-      });
-    });
-  }
-
   function init() {
     extGet(['mgp_token', 'mgp_base_url', 'mgp_filter', 'mgp_enabled'], function (r) {
       if (r.mgp_enabled === false) return;
       if (!matchesFilter(r.mgp_filter)) return;
       injectDeps();
-      if (r.mgp_token) startApps(r.mgp_base_url, r.mgp_token); else startLogin();
+      var root = createRoot();
+      if (!r.mgp_base_url || !r.mgp_token) {
+        var settingsApp = { name: 'ログイン', fa: 'fa-solid fa-right-to-bracket', url: '#', _settings: true };
+        buildLauncher(root, [settingsApp], null);
+      } else {
+        fetchApps(r.mgp_base_url, r.mgp_token, function (apps) {
+          buildLauncher(root, apps, r.mgp_token);
+        });
+      }
     });
   }
 

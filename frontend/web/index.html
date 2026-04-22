@@ -3,56 +3,53 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href="./favicon.ico" type="image/svg+xml" />
         <title>マジックポータル™</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
         <link rel="stylesheet" href="./style.css" />
         <script type="module" src="./index.js"></script>
     </head>
-    <body class="bg-[var(--color-bg)] text-[var(--color-black)] min-h-screen">
-        <div class="min-h-screen p-4 md:p-6 max-w-6xl mx-auto">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles text-[var(--color-primary)] text-lg"></i>
-                        <h1 class="text-xl md:text-2xl font-semibold leading-tight">マジックポータル&trade;</h1>
-                    </div>
+    <body class="min-h-screen">
+        <div class="min-h-screen p-4 md:p-8 max-w-6xl mx-auto">
+            <header class="flex items-center justify-between mb-8 animate-fade-up">
+                <div class="flex items-center gap-3">
+                    <img src="./logo.png" alt="" class="w-9 h-9" />
+                    <h1 class="text-lg md:text-xl font-semibold tracking-tight">マジックポータル&trade;</h1>
                 </div>
-                <div class="flex flex-col sm:items-end gap-2">
-                    <div class="flex flex-wrap gap-2 justify-end">
-                        <a
-                            id="admin-link"
-                            href="./admin.html"
-                            class="hidden rounded-md border border-[var(--color-primary)]/30 bg-[var(--color-primary)]/10 text-[var(--color-primary)] px-3 py-2 text-sm cursor-pointer hover:bg-[var(--color-primary)]/15 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)] inline-flex items-center"
-                        >
-                            <i class="fa-solid fa-pen-to-square mr-2"></i>
-                            アプリ管理
-                        </a>
-                        <button
-                            id="logout-button"
-                            type="button"
-                            class="rounded-md border border-[var(--color-danger)]/20 bg-[var(--color-danger)]/10 text-[var(--color-danger)] px-3 py-2 text-sm cursor-pointer hover:bg-[var(--color-danger)]/15 transition focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-danger)]"
-                        >
-                            <i class="fa-solid fa-right-from-bracket mr-2"></i>
-                            ログアウト
-                        </button>
-                    </div>
-                    <div id="status" class="text-sm text-gray-500 min-h-[1.25rem] text-right w-full"></div>
+                <div class="flex items-center gap-2">
+                    <a
+                        id="admin-link"
+                        href="./admin.html"
+                        class="hidden rounded-lg border border-[var(--color-primary)]/20 bg-white/60 backdrop-blur text-[var(--color-primary)] px-3 py-2 text-sm cursor-pointer hover:bg-white/80 transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)] items-center gap-2"
+                    >
+                        <i class="fa-solid fa-pen-to-square text-xs"></i>
+                        <span class="hidden sm:inline">管理</span>
+                    </a>
+                    <button
+                        id="logout-button"
+                        type="button"
+                        class="rounded-lg border border-slate-200 bg-white/60 backdrop-blur text-slate-400 px-3 py-2 text-sm cursor-pointer hover:text-[var(--color-danger)] hover:border-[var(--color-danger)]/20 hover:bg-white/80 transition-all focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-danger)]"
+                    >
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
                 </div>
-            </div>
+            </header>
 
-            <div id="apps" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+            <div id="status" class="text-sm text-slate-400 min-h-[1.25rem] mb-4"></div>
+            <div id="apps" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
         </div>
 
-        <div id="nfc-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div class="bg-white rounded-xl p-8 max-w-xs mx-4 text-center shadow-sm">
+        <div id="nfc-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div class="card rounded-2xl p-8 max-w-xs mx-4 text-center animate-fade-up">
                 <i class="fa-solid fa-wifi text-5xl text-[var(--color-primary)] mb-4 block" style="transform: rotate(45deg)"></i>
-                <p class="text-base font-medium text-slate-700 mb-1">マジックカードをタッチ</p>
+                <p class="text-base font-medium mb-1">マジックカードをタッチ</p>
                 <p id="nfc-status" class="text-sm text-slate-400 mb-6 min-h-[1.25rem]"></p>
                 <button id="nfc-cancel" type="button" class="text-slate-400 hover:text-slate-600 text-sm cursor-pointer transition">キャンセル</button>
             </div>
         </div>
-        <script type="module" src="./index.js"></script>
     </body>
 </html>

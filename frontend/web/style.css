@@ -1,26 +1,39 @@
 :root {
-    --color-bg: #f8fafc;
-    --color-black: #334155;
+    --color-bg: #f0f2f8;
+    --color-black: #2d3348;
     --color-primary: #799bf9;
     --color-accent: #ffa775;
     --color-danger: #ff5151;
     --color-success: #22c55e;
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: 'Outfit', sans-serif;
-    background-color: var(--color-bg);
+    font-family: 'Outfit', system-ui, sans-serif;
+    background: linear-gradient(135deg, #e8ecf8 0%, #f0f2f8 40%, #fef3ec 100%);
     color: var(--color-black);
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
 }
 
 [x-cloak] { display: none !important; }
 
 .card {
-    background: white;
-    border: 1px solid #f1f5f9;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow:
+        0 2px 8px rgba(121, 155, 249, 0.06),
+        0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
+
 
 .sortable-ghost {
     opacity: 0.3;
@@ -30,4 +43,38 @@ body {
 .description-text {
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--color-primary), #6b8cf5);
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.25s ease, opacity 0.2s ease;
+    box-shadow: 0 2px 8px rgba(121, 155, 249, 0.3);
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(121, 155, 249, 0.35);
+}
+
+.btn-primary:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+@keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+    animation: fade-up 0.4s ease both;
 }

@@ -2,68 +2,62 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <style>
     * { margin: 0; box-sizing: border-box; }
-    body { width: 280px; padding: 20px; font-family: 'Segoe UI', sans-serif; background: #fafafa; }
-    h1 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
-    label { font-size: 12px; color: #64748b; display: block; margin-bottom: 4px; }
-    input { width: 100%; padding: 8px 10px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 13px; outline: none; }
-    input:focus { border-color: #799BF9; }
-    .hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
-    .row { margin-bottom: 12px; }
-    .status { font-size: 11px; margin-top: 8px; display: none; text-align: center; }
-    .btn { width: 100%; padding: 9px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
-    .btn:hover { opacity: .85; }
-    .btn-primary { background: #799BF9; color: #fff; }
-    .btn-danger { background: none; color: #FF5151; border: 1px solid #FF5151; margin-top: 8px; }
-    .btn-danger:hover { background: #FFF0F0; opacity: 1; }
-    .toggle { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    body { width: 260px; padding: 20px; font-family: 'Outfit', 'Segoe UI', sans-serif; background: linear-gradient(135deg, #eef1fa 0%, #f5f3f0 100%); }
+    h1 { font-size: 13px; font-weight: 600; color: #2d3348; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; letter-spacing: -.02em; }
+    label { font-size: 10px; font-weight: 500; color: #94a3b8; text-transform: uppercase; letter-spacing: .04em; display: block; margin-bottom: 4px; }
+    input[type="text"] { width: 100%; padding: 7px 10px; border: 1.5px solid rgba(121,155,249,.15); border-radius: 8px; font-size: 12px; outline: none; color: #334155; background: rgba(255,255,255,.7); backdrop-filter: blur(4px); transition: border-color .2s; }
+    input[type="text"]::placeholder { color: #cbd5e1; }
+    input[type="text"]:focus { border-color: #799BF9; }
+    .hint { font-size: 10px; color: #94a3b8; margin-top: 3px; }
+    .row { margin-bottom: 14px; }
+    .toggle { position: relative; width: 36px; height: 20px; flex-shrink: 0; }
     .toggle input { display: none; }
-    .toggle span { position: absolute; inset: 0; background: #d1d5db; border-radius: 11px; cursor: pointer; transition: background .2s; }
-    .toggle span::after { content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff; border-radius: 50%; transition: transform .2s; }
+    .toggle span { position: absolute; inset: 0; background: #d1d5db; border-radius: 10px; cursor: pointer; transition: background .2s; }
+    .toggle span::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: transform .2s; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
     .toggle input:checked + span { background: #799BF9; }
-    .toggle input:checked + span::after { transform: translateX(18px); }
-    .divider { border: none; border-top: 1px solid #e2e8f0; margin: 14px 0; }
+    .toggle input:checked + span::after { transform: translateX(16px); }
+    .divider { border: none; border-top: 1px solid rgba(121,155,249,.1); margin: 14px 0; }
+    .btn { width: 100%; padding: 8px; border: none; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; transition: transform .15s, box-shadow .2s, opacity .2s; }
+    .btn-primary { background: linear-gradient(135deg, #799BF9, #6b8cf5); color: #fff; box-shadow: 0 2px 6px rgba(121,155,249,.25); }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(121,155,249,.3); }
+    .btn-primary:active { transform: scale(.98); }
+    .btn-outline { background: rgba(255,255,255,.6); color: #64748b; border: 1px solid rgba(121,155,249,.15); backdrop-filter: blur(4px); }
+    .btn-outline:hover { background: rgba(255,255,255,.9); opacity: 1; }
+    .btn-danger { background: rgba(255,255,255,.6); color: #FF5151; border: 1px solid rgba(255,81,81,.15); }
+    .btn-danger:hover { background: rgba(255,241,241,.8); opacity: 1; }
+    .btn + .btn { margin-top: 10px; }
+    .status { font-size: 11px; margin-top: 6px; display: none; text-align: center; }
     .hidden { display: none; }
   </style>
 </head>
 <body>
   <h1>
-    Magic Portal
+    マジックポータル&trade;
     <label class="toggle"><input type="checkbox" id="enabled"><span></span></label>
   </h1>
+
   <div class="row">
-    <label>サーバURL</label>
-    <input type="text" id="baseUrl" placeholder="https://magic-portal.com/mgp">
-    <div class="hint">例: https://magic-portal.com/mgp</div>
-    <button id="goToWeb" class="btn btn-primary hidden" style="margin-top:8px; padding:6px 10px; font-size:11px; width:auto; display:inline-flex; align-items:center; gap:6px;">
-      Web版に移動 <i class="fa-solid fa-arrow-up-right-from-square"></i>
-    </button>
-  </div>
-  <div class="row">
-    <label>URLフィルター（正規表現）</label>
+    <label>URLフィルター (正規表現)</label>
     <input type="text" id="filter" placeholder=".*">
     <div class="hint">例: ^https?://(www\.)?google\.com</div>
   </div>
-  <button class="btn btn-primary" id="save">保存</button>
-  <div class="status" id="saveStatus"></div>
-  <hr class="divider">
-  <div id="loggedOut">
-    <div class="row">
-      <label>メールアドレス</label>
-      <input type="email" id="userId" placeholder="user@example.com">
-    </div>
-    <div class="row">
-      <label>パスワード</label>
-      <input type="password" id="password" placeholder="password">
-    </div>
-    <button class="btn btn-primary" id="login">ログイン</button>
-  </div>
-  <div id="loggedIn" class="hidden">
-    <button class="btn btn-danger" id="logout">ログアウト</button>
-  </div>
-  <div class="status" id="authStatus"></div>
+
+  <button id="goToWeb" class="btn btn-primary hidden">
+    Web版に移動 <i class="fa-solid fa-arrow-up-right-from-square"></i>
+  </button>
+  <hr class="divider hidden" id="authDivider">
+  <button id="logout" class="btn btn-danger hidden">ログアウト</button>
+  <button id="goToLogin" class="btn btn-primary">
+    <i class="fa-solid fa-right-to-bracket"></i> ログイン
+  </button>
+
+  <div class="status" id="status"></div>
   <script src="popup.js"></script>
 </body>
 </html>
