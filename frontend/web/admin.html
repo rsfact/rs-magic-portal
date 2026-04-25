@@ -23,11 +23,6 @@
                     <h1 class="text-lg font-semibold tracking-tight">管理者設定</h1>
                 </div>
                 <div class="flex items-center gap-3">
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" x-model="isMagicLoginEnabled" @change="toggleMagicLogin" class="sr-only peer">
-                        <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
-                        <span class="ml-2 text-sm font-medium transition-colors" :class="isMagicLoginEnabled ? 'text-[var(--color-primary)]' : 'text-slate-400'"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>マジックログイン</span>
-                    </label>
                     <a href="./index.html" class="rounded-lg border border-slate-200 bg-white/60 backdrop-blur px-4 py-2 text-sm font-medium hover:bg-white/80 transition-all text-slate-500">
                         <i class="fa-solid fa-house mr-1.5 text-xs"></i>ホーム
                     </a>

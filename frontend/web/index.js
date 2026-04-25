@@ -8,10 +8,8 @@ import {
     set_auth_token,
     token_authorization_header,
 } from "./common.js";
-import { NFC_USER_ID_PATTERN } from "./config.js";
 
 const LOGIN_URL = new URL("login.html", window.location.href).toString();
-const MGP_MAGIC_LOGIN_KEY = "mgp_is_enable_magic_login";
 
 function extract_handoff_token() {
     const hash = window.location.hash;
@@ -61,65 +59,6 @@ async function create_handoff_token() {
         return res.json.data.token;
     }
     return null;
-}
-
-async function impersonate_login(user_id) {
-    const token = get_auth_token();
-    if (!token) return null;
-    const res = await api_post("/auth/impersonate",
-        { user_id, expire_minutes: 1 },
-        { headers: token_authorization_header(token) },
-    );
-    if (res.ok && res.json?.success && res.json?.data?.token) {
-        return res.json.data.token;
-    }
-    set_status("代理ログインに失敗しました。", true);
-    return null;
-}
-
-function show_nfc_modal() {
-    if (!("NDEFReader" in window)) {
-        set_status("このブラウザはNFCに対応していません。", true);
-        return Promise.resolve(null);
-    }
-    const modal = document.getElementById("nfc-modal");
-    const status_el = document.getElementById("nfc-status");
-    const cancel_btn = document.getElementById("nfc-cancel");
-    const controller = new AbortController();
-
-    modal.classList.remove("hidden");
-    status_el.textContent = "";
-
-    return new Promise((resolve) => {
-        let resolved = false;
-        const done = (val) => {
-            if (resolved) return;
-            resolved = true;
-            modal.classList.add("hidden");
-            resolve(val);
-        };
-
-        cancel_btn.onclick = () => { controller.abort(); done(null); };
-
-        const reader = new NDEFReader();
-        reader.scan({ signal: controller.signal }).then(() => {
-            status_el.textContent = "待機中...";
-            reader.onreading = (event) => {
-                for (const record of event.message.records) {
-                    let raw = null;
-                    if (record.recordType === "url") {
-                        raw = new TextDecoder().decode(record.data);
-                    } else if (record.recordType === "text") {
-                        raw = new TextDecoder(record.encoding).decode(record.data);
-                    }
-                    if (!raw) continue;
-                    const m = raw.match(NFC_USER_ID_PATTERN);
-                    if (m) { done(m[1]); return; }
-                }
-                status_el.textContent = "カードを読み取れませんでした";
-            };
-        }).catch(() => done(null));
-    });
 }
 
 async function load_profile(token) {
@@ -217,14 +156,7 @@ window.addEventListener("DOMContentLoaded", async () => {
             if (!app.url) return null;
             if (!app.is_send_token_enabled) return app.url;
 
-            let t;
-            if (localStorage.getItem(MGP_MAGIC_LOGIN_KEY)) {
-                const user_id = await show_nfc_modal();
-                if (!user_id) return null;
-                t = await impersonate_login(user_id);
-            } else {
-                t = await create_handoff_token();
-            }
+            const t = await create_handoff_token();
             if (!t) return null;
             const sep = app.url.includes('#') ? '&' : '#';
             return app.url + sep + 'token=' + encodeURIComponent(t);

@@ -21,15 +21,6 @@ const start = () => {
         isLoading: true,
         formData: { id: '', name: '', description: '', url: '', fa_icon: '', is_send_token_enabled: false },
         token: '',
-        isMagicLoginEnabled: !!localStorage.getItem('mgp_is_enable_magic_login'),
-
-        toggleMagicLogin() {
-            if (this.isMagicLoginEnabled) {
-                localStorage.setItem('mgp_is_enable_magic_login', '1');
-            } else {
-                localStorage.removeItem('mgp_is_enable_magic_login');
-            }
-        },
 
         async init() {
             this.token = await this.refreshToken();
