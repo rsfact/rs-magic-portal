@@ -31,7 +31,7 @@
                 </div>
                 <div class="flex items-center gap-3">
                     <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" x-model="isMagicLoginEnabled" @change="toggleMagicLogin" class="sr-only peer">
+                        <input type="checkbox" x-model="isMagicLoginEnabled" @change="toggleMagicLogin" :disabled="!canEnableMagicLogin" class="sr-only peer disabled:opacity-50">
                         <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--color-primary)]"></div>
                         <span class="ml-2 text-sm font-medium transition-colors" :class="isMagicLoginEnabled ? 'text-[var(--color-primary)]' : 'text-slate-400'"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i>マジックログイン</span>
                     </label>

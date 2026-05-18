@@ -1,2 +1,3 @@
 export const API_BASE_URL = "http://localhost:8000/mgp/api";
-export const NFC_USER_ID_PATTERN = /^https:\/\/example\.com\/u\/([a-f0-9-]+)$/;
+export const NFC_USER_ID_PATTERN = /^https:\/\/example\.com\/ui\/index\.html\?u=([a-f0-9-]+)/;
+export const NFC_DATA_IS_URL = true;

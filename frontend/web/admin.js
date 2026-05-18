@@ -9,8 +9,10 @@ import {
     token_authorization_header,
     first_error_message,
 } from "./common.js";
+import { NFC_DATA_IS_URL } from "./config.js";
 
 const LOGIN_URL = new URL("login.html", window.location.href).toString();
+const MGP_MAGIC_LOGIN_KEY = "mgp_is_enable_magic_login";
 
 const start = () => {
     Alpine.data('appManager', () => ({
@@ -21,13 +23,19 @@ const start = () => {
         isLoading: true,
         formData: { id: '', name: '', description: '', url: '', fa_icon: '', is_send_token_enabled: false },
         token: '',
-        isMagicLoginEnabled: !!localStorage.getItem('mgp_is_enable_magic_login'),
+        canEnableMagicLogin: NFC_DATA_IS_URL || ("NDEFReader" in window),
+        isMagicLoginEnabled: !!localStorage.getItem(MGP_MAGIC_LOGIN_KEY),
 
         toggleMagicLogin() {
+            if (!this.canEnableMagicLogin) {
+                this.isMagicLoginEnabled = false;
+                localStorage.removeItem(MGP_MAGIC_LOGIN_KEY);
+                return;
+            }
             if (this.isMagicLoginEnabled) {
-                localStorage.setItem('mgp_is_enable_magic_login', '1');
+                localStorage.setItem(MGP_MAGIC_LOGIN_KEY, '1');
             } else {
-                localStorage.removeItem('mgp_is_enable_magic_login');
+                localStorage.removeItem(MGP_MAGIC_LOGIN_KEY);
             }
         },
 

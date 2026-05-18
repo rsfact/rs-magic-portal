@@ -8,10 +8,12 @@ import {
     set_auth_token,
     token_authorization_header,
 } from "./common.js";
-import { NFC_USER_ID_PATTERN } from "./config.js";
+import { NFC_DATA_IS_URL, NFC_USER_ID_PATTERN } from "./config.js";
 
 const LOGIN_URL = new URL("login.html", window.location.href).toString();
 const MGP_MAGIC_LOGIN_KEY = "mgp_is_enable_magic_login";
+const MGP_PENDING_KEY = "mgp_magic_login_pending";
+const PENDING_TTL_MS = 60_000;
 
 function extract_handoff_token() {
     const hash = window.location.hash;
@@ -77,6 +79,56 @@ async function impersonate_login(user_id) {
     return null;
 }
 
+function read_pending() {
+    const raw = localStorage.getItem(MGP_PENDING_KEY);
+    if (!raw) return null;
+    try {
+        const obj = JSON.parse(raw);
+        if (obj && typeof obj.expires_at === "number" && obj.expires_at > Date.now()) return obj;
+    } catch {}
+    localStorage.removeItem(MGP_PENDING_KEY);
+    return null;
+}
+
+function write_pending(app_url) {
+    localStorage.setItem(MGP_PENDING_KEY, JSON.stringify({
+        app_url,
+        expires_at: Date.now() + PENDING_TTL_MS,
+    }));
+}
+
+function clear_pending() {
+    localStorage.removeItem(MGP_PENDING_KEY);
+}
+
+function append_token_to_url(url, token) {
+    const sep = url.includes('#') ? '&' : '#';
+    return url + sep + 'token=' + encodeURIComponent(token);
+}
+
+// URL方式: NFC カードのタッチ(OS が新タブで着地URLを開く)を待つだけのモーダル。
+// 着地側で clear_pending() されると storage イベントで自動的に閉じる。
+function show_wait_modal() {
+    const modal = document.getElementById("nfc-modal");
+    const status_el = document.getElementById("nfc-status");
+    const cancel_btn = document.getElementById("nfc-cancel");
+
+    modal.classList.remove("hidden");
+    status_el.textContent = "待機中...";
+
+    const on_storage = (e) => {
+        if (e.key === MGP_PENDING_KEY && !e.newValue) close();
+    };
+    const close = () => {
+        modal.classList.add("hidden");
+        window.removeEventListener("storage", on_storage);
+        cancel_btn.onclick = null;
+    };
+    cancel_btn.onclick = () => { clear_pending(); close(); };
+    window.addEventListener("storage", on_storage);
+}
+
+// Web NFC API方式: モーダル内で NDEFReader.scan() を起動し、読み取った値から user_id を抽出する。
 function show_nfc_modal() {
     if (!("NDEFReader" in window)) {
         set_status("このブラウザはNFCに対応していません。", true);
@@ -120,6 +172,33 @@ function show_nfc_modal() {
             };
         }).catch(() => done(null));
     });
+}
+
+// URL方式の着地ロジック。?u=... を含むURLでアクセスされたときに呼ばれる。
+// 戻り値: true なら別画面/別URLへ遷移を開始した(以降の通常処理は不要)。
+async function handle_landing(params) {
+    const rdr = params.get("rdr");
+    const m = window.location.href.match(NFC_USER_ID_PATTERN);
+    const user_id = m ? m[1] : null;
+    const pending = read_pending();
+
+    if (!pending) {
+        // 待機外: 名刺カードとして rdr へ
+        if (rdr) { window.location.replace(rdr); return true; }
+        return false;
+    }
+
+    clear_pending();
+    if (!user_id) return false;
+
+    const token = await refresh_token();
+    if (!token) return false;
+
+    const impersonated = await impersonate_login(user_id);
+    if (!impersonated) return false;
+
+    window.location.replace(append_token_to_url(pending.app_url, impersonated));
+    return true;
 }
 
 async function load_profile(token) {
@@ -174,6 +253,17 @@ ${app.is_send_token_enabled ? '<span class="text-[var(--color-success)] text-[10
 window.addEventListener("DOMContentLoaded", async () => {
     document.title = "マジックポータル™";
 
+    // URL方式の着地モード: ?u=... があれば最優先で処理
+    if (NFC_DATA_IS_URL) {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get("u")) {
+            const handled = await handle_landing(params);
+            if (handled) return;
+            // 失敗/中断 → クエリを掃除して通常 flow に流す
+            history.replaceState(null, "", window.location.pathname);
+        }
+    }
+
     const incoming = extract_handoff_token();
     let token;
     if (incoming) {
@@ -212,34 +302,48 @@ window.addEventListener("DOMContentLoaded", async () => {
         const wrap = document.createElement("div");
         wrap.innerHTML = card_html(app, i);
         const el = wrap.firstElementChild;
-        
-        const getUrl = async () => {
-            if (!app.url) return null;
-            if (!app.is_send_token_enabled) return app.url;
 
-            let t;
-            if (localStorage.getItem(MGP_MAGIC_LOGIN_KEY)) {
-                const user_id = await show_nfc_modal();
-                if (!user_id) return null;
-                t = await impersonate_login(user_id);
-            } else {
-                t = await create_handoff_token();
-            }
-            if (!t) return null;
-            const sep = app.url.includes('#') ? '&' : '#';
-            return app.url + sep + 'token=' + encodeURIComponent(t);
-        };
-
+        // コピーは常に自分用 handoff トークン。マジックログインは「起動」専用機能。
         el.querySelector(".app-copy-url").addEventListener("click", async (e) => {
             e.stopPropagation();
-            const u = await getUrl();
-            if (u) navigator.clipboard.writeText(u);
+            if (!app.url) return;
+            let final = app.url;
+            if (app.is_send_token_enabled) {
+                const t = await create_handoff_token();
+                if (!t) return;
+                final = append_token_to_url(app.url, t);
+            }
+            navigator.clipboard.writeText(final);
         });
 
         el.querySelector(".app-launch").addEventListener("click", async (e) => {
             e.stopPropagation();
-            const u = await getUrl();
-            if (u) window.open(u, "_blank");
+            if (!app.url) return;
+            if (!app.is_send_token_enabled) {
+                window.open(app.url, "_blank");
+                return;
+            }
+
+            const magic_on = !!localStorage.getItem(MGP_MAGIC_LOGIN_KEY);
+
+            if (magic_on && NFC_DATA_IS_URL) {
+                // URL方式: 待機フラグを立て、OS が着地URLを別タブで開くのを待つ。
+                // 着地側で app_url + #token= に replace される。
+                write_pending(app.url);
+                show_wait_modal();
+                return;
+            }
+
+            let t;
+            if (magic_on) {
+                const user_id = await show_nfc_modal();
+                if (!user_id) return;
+                t = await impersonate_login(user_id);
+            } else {
+                t = await create_handoff_token();
+            }
+            if (!t) return;
+            window.open(append_token_to_url(app.url, t), "_blank");
         });
 
         container.appendChild(el);
