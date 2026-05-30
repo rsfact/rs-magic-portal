@@ -102,8 +102,7 @@ function clear_pending() {
 }
 
 function append_token_to_url(url, token) {
-    const sep = url.includes('#') ? '&' : '#';
-    return url + sep + 'token=' + encodeURIComponent(token);
+    return url + '#token=' + encodeURIComponent(token);
 }
 
 // URL方式: NFC カードのタッチ(OS が新タブで着地URLを開く)を待つだけのモーダル。
