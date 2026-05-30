@@ -87,8 +87,7 @@
 
   function appendToken(url, token) {
     if (!token || !url || url === '#') return url;
-    var sep = url.indexOf('#') === -1 ? '#' : '&';
-    return url + sep + 'token=' + encodeURIComponent(token);
+    return url + '#token=' + encodeURIComponent(token);
   }
 
   function createRoot() {
