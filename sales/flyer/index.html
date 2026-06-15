@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<!--
+# チラシ制作ガイドライン v1.0.0
+
+## 姿勢
+* 指示にないものを足さない。指示されたものを引かない。迷ったら、短く返して確認する。
+* 指示にない要素やコピーを追加しない。
+* 不確実な箇所、補完した箇所、削った箇所は明示する。
+
+## 言葉
+* 指定がなければ、日本語のみで組む。FEATURE、ABOUT、、PRICINGのような英文小見出しを勝手に添えない。意味がなく、可読性を落とす工夫は、害悪である。
+* 助詞・副詞の余計な追加と重複をしない。
+
+## デザイン
+* プロのデザイナーが手がけた印象を目指す。信頼性は高く、無駄はない。
+* 余白を広く、階層は書体のサイズと太さで作る。
+* カードの上辺カラーバー、グロー、装飾的シャドウ、汎用的グラデーション、英文の飾り見出しなど、AI が手癖で出しがちな表現を避ける。
+* 印刷物として違和感のない仕上げにする（背景色は print-color-adjust: exact）。
+* キャラクター・人物イラストは原則使わない。
+
+## 出力
+* A4 両面、1 つの HTML に 1~2 枚の sheet を入れて印刷前提で組む。
+
+## バージョン管理
+* チラシのタイトルは「名称_vX.X.X」の形式で Semantic Versioning に従う。構成変更で major、内容追加・変更で minor、文言や微調整で patch を上げる。
+* このガイドライン自体も Semantic Versioning で管理し、同じ bump ルールに従う。
+* ガイドライン自体のバージョンと、チラシ本体のバージョンは無関係である。
+-->
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マジックポータル_チラシ_v1.0.0</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --color-primary:#799BF9;
+    --color-accent:#FFA775;
+    --bg:#FAFAFA;
+    --ink:#2B2F3A;
+    --ink-soft:#5A6071;
+    --line:#E7E7EA;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{background:#E4E4E4;}
+  @page{ size:A4; margin:0; }
+  body{
+    font-family:"Zen Kaku Gothic New",sans-serif;color:var(--ink);font-weight:500;
+    display:flex;flex-direction:column;align-items:center;gap:24px;
+    padding:24px;-webkit-font-smoothing:antialiased;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+  }
+  .sheet{
+    position:relative;width:210mm;height:297mm;background:var(--bg);
+    overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.22);
+    padding:14mm 16mm 0;display:flex;flex-direction:column;
+  }
+
+  .sec-h{font-size:17px;font-weight:900;margin-bottom:13px;display:flex;align-items:center;gap:11px;}
+  .sec-h::before{content:"";width:5px;height:18px;border-radius:3px;background:var(--color-primary);}
+
+  /* ===== hero ===== */
+  .hero{margin-top:4px;}
+  .title-row{display:flex;align-items:center;gap:11px;}
+  .title-row .logo{height:33px;width:auto;object-fit:contain;flex-shrink:0;display:block;}
+  .title-row h1{font-size:22px;font-weight:900;line-height:1;}
+  .catch{margin-top:26px;}
+  .catch .copy{font-size:33px;font-weight:900;line-height:1.42;letter-spacing:.01em;}
+  .catch .copy .hl{color:var(--color-primary);}
+  .catch .lead{margin-top:18px;font-size:14px;color:var(--ink-soft);font-weight:500;line-height:2.05;}
+
+  .divider{height:1px;background:#DEDEE3;margin:44px 0 36px;}
+
+  /* ===== worries ===== */
+  .worries{margin-top:0;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  .worry{background:#fff;border:1px solid var(--line);border-radius:11px;padding:14px;text-align:center;}
+  .worry .ic{width:36px;height:36px;border-radius:9px;display:grid;place-items:center;margin:0 auto 9px;
+    background:#FFEDE0;color:var(--color-accent);font-size:15px;}
+  .worry p{font-size:12px;line-height:1.6;font-weight:500;}
+
+  /* ===== mock (実画面イメージ) ===== */
+  .mock-wrap{margin-top:40px;}
+  .mock-row{display:flex;align-items:center;gap:16px;}
+  .keycard{flex-shrink:0;width:152px;}
+  .card-face{aspect-ratio:1.586;border-radius:14px;padding:15px;color:var(--ink-soft);
+    background:linear-gradient(140deg,#EFF0F4 0%,#DBDDE4 100%);border:1px solid #D2D4DC;
+    display:flex;flex-direction:column;justify-content:space-between;
+    box-shadow:0 7px 16px rgba(45,51,72,.14);}
+  .card-face .cf-top{display:flex;align-items:center;justify-content:space-between;}
+  .card-face .chip{width:30px;height:23px;border-radius:5px;
+    background:linear-gradient(135deg,#CDD0D8,#A9ADB8);border:1px solid rgba(45,51,72,.08);}
+  .card-face .cf-top i{font-size:17px;transform:rotate(45deg);}
+  .card-face .cf-bot{display:flex;align-items:flex-end;}
+  .card-face .cf-bot img{height:25px;width:auto;object-fit:contain;}
+  .keycard .kc-cap{text-align:center;font-size:11px;font-weight:900;margin-top:9px;}
+  .touch{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;
+    color:var(--color-accent);}
+  .touch i{font-size:20px;}
+  .touch span{font-size:10px;font-weight:900;color:var(--ink-soft);}
+  .mock{flex:1;border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    background:linear-gradient(135deg,#E8ECF8 0%,#F0F2F8 45%,#FEF3EC 100%);}
+  .mock-bar{display:flex;align-items:center;justify-content:space-between;
+    padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.6);}
+  .mock-bar .brand{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:900;}
+  .mock-bar .brand img{width:22px;height:22px;object-fit:contain;}
+  .mock-bar .acts{display:flex;gap:7px;color:#9AA0B0;font-size:11px;}
+  .mock-bar .acts span{width:24px;height:24px;border-radius:7px;background:rgba(255,255,255,.7);
+    display:grid;place-items:center;}
+  .mock-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:14px;}
+  .mcard{background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.7);
+    border-radius:12px;padding:12px;display:flex;flex-direction:column;}
+  .mcard .ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;
+    background:#EEF2FE;color:var(--color-primary);font-size:13px;margin-bottom:8px;}
+  .mcard .nm{font-size:12.5px;font-weight:900;}
+  .mcard .ds{font-size:10px;color:var(--ink-soft);line-height:1.5;margin-top:3px;min-height:26px;}
+  .mcard .go{margin-top:10px;text-align:center;font-size:10px;font-weight:700;color:#fff;
+    background:var(--color-primary);border-radius:8px;padding:6px 0;white-space:nowrap;}
+  .mock-note{margin-top:26px;display:flex;align-items:center;gap:14px;
+    background:#EEF2FE;border:1px solid #D7E0FB;border-radius:13px;padding:16px 20px;}
+  .mock-note .ic{width:42px;height:42px;border-radius:11px;flex-shrink:0;display:grid;place-items:center;
+    background:var(--color-primary);color:#fff;font-size:18px;}
+  .mock-note .ic i{transform:rotate(45deg);}
+  .mock-note p{font-size:13px;line-height:1.75;font-weight:700;}
+  .mock-note p .hl{color:var(--color-primary);font-weight:900;}
+  .mock-note p small{display:block;font-size:11.5px;color:var(--ink-soft);font-weight:500;margin-top:2px;}
+
+  /* CTA footer */
+  .cta{margin-top:auto;margin-left:-16mm;margin-right:-16mm;
+    background:var(--color-primary);color:#fff;padding:18px 16mm;}
+  .cta h4{font-size:20px;font-weight:900;letter-spacing:.02em;}
+  .cta .lead-p{font-size:12px;margin-top:5px;opacity:.95;}
+  .cta .contact{font-size:13px;font-weight:700;margin-top:11px;display:flex;align-items:center;}
+  .cta .contact i{margin:0 6px 0 14px;font-weight:400;}
+
+  /* quarter-circle 裏面誘導 */
+  .flip{position:absolute;right:0;bottom:0;width:188px;height:188px;
+    background:var(--color-accent);border-top-left-radius:100%;}
+  .flip .inner{position:absolute;right:18px;bottom:34px;text-align:right;color:#fff;}
+  .flip .inner .l1,.flip .inner .l2{display:block;white-space:nowrap;font-weight:900;}
+  .flip .inner .l1{font-size:16px;line-height:1.4;}
+  .flip .inner .l2{line-height:1.3;margin-top:5px;}
+  .flip .inner .big{font-size:26px;letter-spacing:.01em;}
+  .flip .inner .l2 i{margin-left:8px;font-size:19px;}
+
+  /* ===== back: official apps ===== */
+  .off-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px;}
+  .oapp{background:#fff;border:1px solid var(--line);border-radius:11px;padding:12px;text-align:center;}
+  .oapp .ic{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;margin:0 auto 8px;
+    background:#EEF2FE;color:var(--color-primary);font-size:14px;}
+  .oapp .nm{font-size:12.5px;font-weight:900;}
+  .oapp .ds{font-size:10px;color:var(--ink-soft);margin-top:3px;line-height:1.4;}
+  .oapp .pr{margin-top:8px;font-size:12px;font-weight:900;color:var(--color-primary);}
+  .oapp .pr small{font-weight:500;color:var(--ink-soft);font-size:10px;}
+  .oapp.soon{background:#F4F4F6;border-style:dashed;}
+  .oapp.soon .ic{background:#E7E7EA;color:#A9ADB8;}
+  .oapp.soon .nm,.oapp.soon .ds{color:#A9ADB8;}
+  .oapp.more{background:#FFF6EF;border-color:#FFE2CC;}
+  .oapp.more .ic{background:#FFEDE0;color:var(--color-accent);}
+  .oapp.more .nm{color:var(--color-accent);}
+
+  /* back: custom cases */
+  .cases{display:flex;flex-direction:column;gap:10px;margin-top:6px;}
+  .case{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 18px;}
+  .case .chip{display:inline-block;font-size:11px;font-weight:700;color:#fff;background:var(--color-primary);
+    padding:3px 12px;border-radius:20px;margin-bottom:8px;}
+  .case h3{font-size:15px;font-weight:900;margin-bottom:9px;}
+  .case .row{display:flex;gap:11px;margin-bottom:6px;}
+  .case .row:last-child{margin-bottom:0;}
+  .case .row .t{flex-shrink:0;width:34px;font-size:11px;font-weight:900;color:var(--color-primary);padding-top:2px;}
+  .case .row.eff .t{color:var(--color-accent);}
+  .case .row p{font-size:12px;line-height:1.65;color:var(--ink);}
+  .case .row p b{font-weight:900;}
+
+  /* price */
+  .sim{background:#fff;border:1px solid var(--line);border-radius:12px;padding:6px 18px 8px;margin-top:6px;}
+  .sim-row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;
+    padding:11px 0;border-top:1px dashed var(--line);}
+  .sim-row:first-child{border-top:none;}
+  .sim-row .l{font-size:13px;font-weight:700;}
+  .sim-row .l small{display:block;font-weight:500;color:var(--ink-soft);font-size:11px;margin-top:2px;}
+  .sim-row .l small.inline{display:inline;margin:0 0 0 6px;}
+  .sim-row .p{font-size:19px;font-weight:900;white-space:nowrap;color:var(--ink);}
+  .sim-row .p small{font-size:12px;}
+
+  @media print{
+    html,body{background:#fff;}
+    body{padding:0;gap:0;}
+    .sheet{box-shadow:none;}
+    .sheet.front{page-break-after:always;}
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============ FRONT ============ -->
+  <div class="sheet front">
+    <section class="hero">
+      <div class="title-row">
+        <img class="logo" src="../logo.png" alt="マジックポータル">
+        <h1>マジックポータル</h1>
+      </div>
+      <div class="catch">
+        <p class="copy"><span class="hl">パズル型DX</span>で、小さな1歩目を。</p>
+        <p class="lead">必要なアプリを必要なときに。<br>小さく始めて、だんだんピースを足していく。<br>社内アプリをひとまとめにする、社内ポータルです。</p>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="worries">
+      <h2 class="sec-h">こんなお悩み、ありませんか？</h2>
+      <div class="grid3">
+        <div class="worry">
+          <div class="ic"><i class="fa-solid fa-signs-post"></i></div>
+          <p>DXを進めたいが、<br>始め方が分からない。</p>
+        </div>
+        <div class="worry">
+          <div class="ic"><i class="fa-solid fa-boxes-stacked"></i></div>
+          <p>社内システムが、<br>バラバラで煩雑。</p>
+        </div>
+        <div class="worry">
+          <div class="ic"><i class="fa-solid fa-face-frown"></i></div>
+          <p>アナログ社員が、<br>IT化を嫌がる。</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mock-wrap">
+      <h2 class="sec-h">1台のタブレットに、すべてのアプリを。</h2>
+      <div class="mock-row">
+        <div class="keycard">
+          <div class="card-face">
+            <div class="cf-top"><span class="chip"></span><i class="fa-solid fa-wifi"></i></div>
+            <div class="cf-bot"><img src="./logo.png" alt=""></div>
+          </div>
+          <div class="kc-cap">社員一人に、一枚。</div>
+        </div>
+        <div class="touch"><i class="fa-solid fa-wifi"></i><span>タッチ</span></div>
+        <div class="mock">
+          <div class="mock-bar">
+            <div class="brand"><img src="./logo.png" alt="">マジックポータル</div>
+            <div class="acts"><span><i class="fa-solid fa-gear"></i></span><span><i class="fa-solid fa-right-from-bracket"></i></span></div>
+          </div>
+          <div class="mock-grid">
+            <div class="mcard">
+              <div class="ico"><i class="fa-solid fa-comment-dots"></i></div>
+              <div class="nm">ボイス伝言板</div>
+              <div class="ds">声で残す、社内連絡。</div>
+              <div class="go">タッチでログイン</div>
+            </div>
+            <div class="mcard">
+              <div class="ico"><i class="fa-solid fa-pen-to-square"></i></div>
+              <div class="nm">かんたん日報</div>
+              <div class="ds">毎日の記録を手軽に。</div>
+              <div class="go">タッチでログイン</div>
+            </div>
+            <div class="mcard">
+              <div class="ico"><i class="fa-solid fa-calendar-days"></i></div>
+              <div class="nm">共有カレンダー</div>
+              <div class="ds">予定をみんなで共有。</div>
+              <div class="go">タッチでログイン</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="mock-note">
+        <div class="ic"><i class="fa-solid fa-wifi"></i></div>
+        <p><span class="hl">共有タブレットに、マジックカードをタッチするだけでログイン。</span><small>個人スマホへのインストールや、わずらわしいアカウント管理などは不要です。</small></p>
+      </div>
+    </section>
+
+    <footer class="cta">
+      <h4>まずは、担当PMまでご相談ください。</h4>
+      <p class="lead-p">ご相談・お見積りは無料です。<br>気軽に30分、ご状況をお聞かせください。</p>
+      <p class="contact"><span>RSfact株式会社</span><i class="fa-regular fa-envelope"></i><span>info@rsfact.com</span></p>
+    </footer>
+
+    <div class="flip">
+      <div class="inner">
+        <span class="l1">選べるアプリは</span>
+        <span class="l2"><span class="big">裏面へ</span><i class="fa-solid fa-play"></i></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ BACK ============ -->
+  <div class="sheet back">
+    <section class="official">
+      <h2 class="sec-h" style="margin-top:4px;">選べるアプリ</h2>
+      <div class="off-grid">
+        <div class="oapp">
+          <div class="ic"><i class="fa-solid fa-pen-to-square"></i></div>
+          <div class="nm">かんたん日報</div>
+          <div class="ds">毎日の記録を手軽に。</div>
+          <div class="pr">月額5,000<small>円/社</small></div>
+        </div>
+        <div class="oapp">
+          <div class="ic"><i class="fa-solid fa-comment-dots"></i></div>
+          <div class="nm">ボイス伝言板</div>
+          <div class="ds">声で残す、社内連絡。</div>
+          <div class="pr">月額3,000<small>円/社</small></div>
+        </div>
+        <div class="oapp">
+          <div class="ic"><i class="fa-solid fa-robot"></i></div>
+          <div class="nm">メールアシスタントAI</div>
+          <div class="ds">返信文をAIが下書き。</div>
+          <div class="pr">月額3,000<small>円</small></div>
+        </div>
+        <div class="oapp">
+          <div class="ic"><i class="fa-solid fa-calendar-days"></i></div>
+          <div class="nm">共有カレンダー</div>
+          <div class="ds">予定をみんなで共有。</div>
+          <div class="pr">月額5,000<small>円/社</small></div>
+        </div>
+        <div class="oapp">
+          <div class="ic"><i class="fa-solid fa-clock"></i></div>
+          <div class="nm">シンプル勤怠</div>
+          <div class="ds">出退勤をまとめて。</div>
+          <div class="pr">月額15,000<small>円/社</small></div>
+        </div>
+        <div class="oapp more">
+          <div class="ic"><i class="fa-solid fa-puzzle-piece"></i></div>
+          <div class="nm">新アプリ 続々リリース</div>
+          <div class="ds">ご要望から生まれます。</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="custom">
+      <h2 class="sec-h" style="margin-top:16px;">カスタムアプリ事例</h2>
+      <div class="cases">
+        <div class="case">
+          <span class="chip">製造業・20名／作業実績アプリ</span>
+          <h3>紙の記録と手入力を、カードと音声で自動化。</h3>
+          <div class="row"><span class="t">課題</span><p>紙に作業時間を記録し、<b>システムへ事務員さんが手入力</b>していた。</p></div>
+          <div class="row eff"><span class="t">解決</span><p>作業後、タブレットにカードをかざして実績を音声入力。<b>AIが解析し、システムへ自動登録</b>されます。</p></div>
+        </div>
+        <div class="case">
+          <span class="chip">介護・35名／申し送りアプリ</span>
+          <h3>紙の申し送りを、声でかんたんに引き継ぐ。</h3>
+          <div class="row"><span class="t">課題</span><p>紙の申し送りノートでは、<b>シフトをまたぐと情報が抜け落ちて</b>いた。</p></div>
+          <div class="row eff"><span class="t">解決</span><p>退勤時にカードをかざし、申し送りを音声で記録。<b>次の担当者がポータルで確認</b>できます。</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="price">
+      <h2 class="sec-h" style="margin-top:16px;">料金</h2>
+      <div class="sim">
+        <div class="sim-row"><div class="l">初期費用</div><div class="p">15<small>万円</small></div></div>
+        <div class="sim-row"><div class="l">月額<small>30名まで（31名以上は +500円/人）</small></div><div class="p">3<small>万円/月</small></div></div>
+        <div class="sim-row"><div class="l">マジックカード<small class="inline">／ ログイン用カードキー</small></div><div class="p">1,000<small>円/枚〜</small></div></div>
+      </div>
+    </section>
+
+    <footer class="cta">
+      <h4>まずは、担当PMまでご相談ください。</h4>
+      <p class="lead-p">ご相談・お見積りは無料です。<br>気軽に30分、ご状況をお聞かせください。</p>
+      <p class="contact"><span>RSfact株式会社</span><i class="fa-regular fa-envelope"></i><span>info@rsfact.com</span></p>
+    </footer>
+  </div>
+
+</body>
+</html>
