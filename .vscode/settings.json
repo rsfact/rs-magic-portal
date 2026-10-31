@@ -1,0 +1,6 @@
+{
+  "markdown.marp.themes": ["./sales/slide/style.css"],
+  "markdown.marp.html": "all",
+  "markdown.marp.breaks": "on",
+  "cSpell.words": ["marp", "RSfact", "mcard", "xmark", "handoff", "eyJhbGci", "oapp", "Kaku"]
+}
